@@ -167,9 +167,23 @@ function App() {
     })
   }
   
+  const saveNote = () => {
+    const formatted = formatNDISNote(transcript)
+    const blob = new Blob([formatted], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `session-note-${new Date().toISOString().split('T')[0]}.txt`
+    a.click()
+    URL.revokeObjectURL(url)
+    setToastMessage('Saved to files!')
+    setShowToast(true)
+    setTimeout(() => setShowToast(false), 2000)
+  }
+  
   const newNote = () => {
     setTranscript('')
-    setStatus('Tap to start recording')
+    setStatus('Tap the mic to start')
   }
   
   const formattedNote = formatNDISNote(transcript)
@@ -211,8 +225,11 @@ function App() {
           
           {hasContent && (
             <div className="actions">
+              <button className="action-btn copy" onClick={saveNote}>
+                💾 Save
+              </button>
               <button className="action-btn copy" onClick={copyNote}>
-                📋 Copy Note
+                📋 Copy
               </button>
               <button className="action-btn new" onClick={newNote}>
                 🔄 New
