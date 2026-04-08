@@ -62,7 +62,10 @@ function App() {
     recognition.lang = 'en-AU'
     
     recognition.onstart = () => {
-      setStatus('Recording... Speak now')
+      setStatus('🔴 Recording... Speak now')
+      setToastMessage('Recording started - speak into mic')
+      setShowToast(true)
+      setTimeout(() => setShowToast(false), 2000)
     }
     
     recognition.onresult = (event) => {
@@ -88,13 +91,17 @@ function App() {
     
     recognition.onerror = (event) => {
       console.error('Speech recognition error:', event.error)
+      let errorMsg = 'Error: ' + event.error
       if (event.error === 'not-allowed') {
-        setStatus('Mic blocked - check browser permissions')
+        errorMsg = '❌ Mic blocked - check browser permissions'
       } else if (event.error === 'no-speech') {
-        setStatus('No speech detected, try again')
-      } else {
-        setStatus('Error: ' + event.error)
+        errorMsg = 'No speech detected, try again'
+      } else if (event.error === 'aborted') {
+        errorMsg = 'Recording stopped'
       }
+      setStatus(errorMsg)
+      setToastMessage(errorMsg)
+      setShowToast(true)
       setIsRecording(false)
       setRecordingTime(0)
       if (timerRef.current) clearInterval(timerRef.current)
