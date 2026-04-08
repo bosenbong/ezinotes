@@ -135,7 +135,8 @@ function App() {
         <div className="record-section">
           <button 
             className={`record-btn ${isRecording ? 'recording' : ''}`}
-            onClick={toggleRecording}
+            onClick={() => alert('Clicked!')}
+            style={{ pointerEvents: 'auto', zIndex: 999 }}
           >
             {isRecording ? '⏹' : '🎤'}
           </button>
