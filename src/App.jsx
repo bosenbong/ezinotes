@@ -88,6 +88,7 @@ function App() {
   }
 
   const toggleRecording = () => {
+    alert('Button clicked!')
     if (isRecording) {
       stopRecording()
     } else {
