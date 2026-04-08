@@ -34,10 +34,19 @@ function App() {
   }
 
   const startRecording = async () => {
+    setStatus('🔄 Starting...')
+    showToastMsg('Requesting mic access...')
+    
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setStatus('❌ Recording not supported on this device')
+      showToastMsg('Your browser does not support recording')
+      return
+    }
+    
     try {
-      console.log('Requesting mic access...')
+      setStatus('🔄 Requesting mic...')
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      console.log('Mic access granted')
+      showToastMsg('Mic granted! Starting recorder...')
       
       const mediaRecorder = new MediaRecorder(stream)
       mediaRecorderRef.current = mediaRecorder
@@ -51,14 +60,13 @@ function App() {
         const blob = new Blob(chunksRef.current, { type: 'audio/webm' })
         setAudioBlob(blob)
         stream.getTracks().forEach(t => t.stop())
-        setStatus('Audio recorded! Transcribing...')
-        showToastMsg('Recording saved! (Need backend for text)')
+        setStatus('✅ Audio recorded!')
+        showToastMsg('Recording saved!')
       }
 
       mediaRecorder.start()
       setIsRecording(true)
       setStatus('🔴 Recording... Speak now')
-      showToastMsg('Recording... speak into mic')
       
       timerRef.current = setInterval(() => {
         setRecordingTime(prev => prev + 1)
@@ -66,7 +74,7 @@ function App() {
     } catch (e) {
       console.error('Mic error:', e)
       setStatus('❌ Mic error: ' + e.message)
-      showToastMsg('Could not access microphone')
+      showToastMsg('Could not access microphone - check permissions')
     }
   }
 
