@@ -43,9 +43,12 @@ function App() {
   const [showToast, setShowToast] = useState(false)
   const [toastMessage, setToastMessage] = useState('')
   const [recordingTime, setRecordingTime] = useState(0)
+  const [useMediaRecorder, setUseMediaRecorder] = useState(false)
   
   const recognitionRef = useRef(null)
   const timerRef = useRef(null)
+  const mediaRecorderRef = useRef(null)
+  const chunksRef = useRef([])
   
   useEffect(() => {
     // Check for Web Speech API support
@@ -124,38 +127,40 @@ function App() {
   }, [isRecording])
   
   const toggleRecording = () => {
-    if (!recognitionRef.current) {
-      setToastMessage('Speech recognition not supported. Try Chrome on mobile.')
-      setShowToast(true)
-      setTimeout(() => setShowToast(false), 4000)
+    // If already recording, stop it
+    if (isRecording) {
+      if (mediaRecorderRef.current) {
+        stopMediaRecording()
+      } else if (recognitionRef.current) {
+        recognitionRef.current.stop()
+        setIsRecording(false)
+        setRecordingTime(0)
+        if (timerRef.current) clearInterval(timerRef.current)
+        setStatus(transcript ? 'Tap to start new note' : 'Tap the mic to start')
+      }
       return
     }
     
-    if (isRecording) {
-      recognitionRef.current.stop()
-      setIsRecording(false)
-      setStatus('Processing...')
-      setRecordingTime(0)
-      if (timerRef.current) clearInterval(timerRef.current)
-      
-      setTimeout(() => {
-        setStatus(transcript ? 'Tap to start new note' : 'Tap the mic to start')
-      }, 500)
-    } else {
+    // Check for SpeechRecognition first
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    
+    if (SpeechRecognition && recognitionRef.current) {
+      // Use Web Speech API
       setTranscript('')
       setRecordingTime(0)
       try {
         recognitionRef.current.start()
         setIsRecording(true)
-        
-        // Start timer
-        timerRef.current = setInterval(() => {
-          setRecordingTime(prev => prev + 1)
-        }, 1000)
+        timerRef.current = setInterval(() => setRecordingTime(prev => prev + 1), 1000)
       } catch (e) {
-        console.error('Failed to start:', e)
-        setStatus('Failed to start - check mic permission')
+        console.error('Speech API failed:', e)
+        setStatus('Speech API failed, trying audio recording...')
+        // Fall through to MediaRecorder
+        startMediaRecording()
       }
+    } else {
+      // Use MediaRecorder
+      startMediaRecording()
     }
   }
   
@@ -163,6 +168,55 @@ function App() {
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
     return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
+  
+  // MediaRecorder-based recording (more reliable for mobile)
+  const startMediaRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const mediaRecorder = new MediaRecorder(stream)
+      mediaRecorderRef.current = mediaRecorder
+      chunksRef.current = []
+      
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data)
+      }
+      
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: 'audio/webm' })
+        setToastMessage('Audio recorded! (Backend needed for transcription)')
+        setShowToast(true)
+        setTimeout(() => setShowToast(false), 3000)
+        stream.getTracks().forEach(t => t.stop())
+      }
+      
+      mediaRecorder.start()
+      setIsRecording(true)
+      setStatus('🔴 Recording audio...')
+      setToastMessage('Recording... speak now')
+      setShowToast(true)
+      setTimeout(() => setShowToast(false), 2000)
+      
+      timerRef.current = setInterval(() => {
+        setRecordingTime(prev => prev + 1)
+      }, 1000)
+    } catch (e) {
+      console.error('MediaRecorder error:', e)
+      setStatus('❌ Mic error: ' + e.message)
+      setToastMessage('Could not access mic')
+      setShowToast(true)
+      setTimeout(() => setShowToast(false), 3000)
+    }
+  }
+  
+  const stopMediaRecording = () => {
+    if (mediaRecorderRef.current) {
+      mediaRecorderRef.current.stop()
+      setIsRecording(false)
+      setRecordingTime(0)
+      if (timerRef.current) clearInterval(timerRef.current)
+      setStatus('Audio recorded - backend needed for transcription')
+    }
   }
   
   const copyNote = () => {
