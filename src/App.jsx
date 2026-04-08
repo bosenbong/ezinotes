@@ -22,10 +22,6 @@ const formatNDISNote = (transcript) => {
   
   const { date, time } = formatDateTime()
   
-  // Extract key information from casual speech
-  const lines = transcript.split(/\s+/).filter(l => l.length > 0)
-  const wordCount = lines.length
-  
   // Simple formatting - convert to professional tone
   let formatted = `SESSION NOTE\n`
   formatted += `Date: ${date}\n`
@@ -43,12 +39,13 @@ const formatNDISNote = (transcript) => {
 function App() {
   const [isRecording, setIsRecording] = useState(false)
   const [transcript, setTranscript] = useState('')
-  const [status, setStatus] = useState('Tap to start recording')
+  const [status, setStatus] = useState('Tap the mic to start')
   const [showToast, setShowToast] = useState(false)
   const [toastMessage, setToastMessage] = useState('')
+  const [recordingTime, setRecordingTime] = useState(0)
   
   const recognitionRef = useRef(null)
-  const mediaRecorderRef = useRef(null)
+  const timerRef = useRef(null)
   
   useEffect(() => {
     // Check for Web Speech API support
@@ -65,7 +62,7 @@ function App() {
     recognition.lang = 'en-AU'
     
     recognition.onstart = () => {
-      setStatus('Recording... Speak naturally')
+      setStatus('Recording... Speak now')
     }
     
     recognition.onresult = (event) => {
@@ -85,24 +82,29 @@ function App() {
         setTranscript(prev => prev + finalTranscript)
       }
       if (interimTranscript) {
-        setStatus('Listening: ' + interimTranscript.substring(0, 30) + '...')
+        setStatus('Listening: ' + interimTranscript.substring(0, 25) + '...')
       }
     }
     
     recognition.onerror = (event) => {
       console.error('Speech recognition error:', event.error)
-      setStatus('Error: ' + event.error)
+      if (event.error === 'not-allowed') {
+        setStatus('Mic blocked - check browser permissions')
+      } else if (event.error === 'no-speech') {
+        setStatus('No speech detected, try again')
+      } else {
+        setStatus('Error: ' + event.error)
+      }
       setIsRecording(false)
+      setRecordingTime(0)
+      if (timerRef.current) clearInterval(timerRef.current)
     }
     
     recognition.onend = () => {
       if (isRecording) {
-        // Restart if still recording
         try {
           recognition.start()
-        } catch (e) {
-          // Already started
-        }
+        } catch (e) {}
       }
     }
     
@@ -110,14 +112,15 @@ function App() {
     
     return () => {
       recognition.stop()
+      if (timerRef.current) clearInterval(timerRef.current)
     }
   }, [isRecording])
   
   const toggleRecording = () => {
     if (!recognitionRef.current) {
-      setToastMessage('Speech recognition not supported')
+      setToastMessage('Speech recognition not supported. Try Chrome on mobile.')
       setShowToast(true)
-      setTimeout(() => setShowToast(false), 3000)
+      setTimeout(() => setShowToast(false), 4000)
       return
     }
     
@@ -125,21 +128,34 @@ function App() {
       recognitionRef.current.stop()
       setIsRecording(false)
       setStatus('Processing...')
+      setRecordingTime(0)
+      if (timerRef.current) clearInterval(timerRef.current)
       
-      // Give it a moment to finalize
       setTimeout(() => {
-        setStatus('Tap to start recording')
-      }, 1000)
+        setStatus(transcript ? 'Tap to start new note' : 'Tap the mic to start')
+      }, 500)
     } else {
       setTranscript('')
+      setRecordingTime(0)
       try {
         recognitionRef.current.start()
         setIsRecording(true)
+        
+        // Start timer
+        timerRef.current = setInterval(() => {
+          setRecordingTime(prev => prev + 1)
+        }, 1000)
       } catch (e) {
         console.error('Failed to start:', e)
-        setStatus('Failed to start recording')
+        setStatus('Failed to start - check mic permission')
       }
     }
+  }
+  
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
   }
   
   const copyNote = () => {
@@ -171,10 +187,20 @@ function App() {
           <button 
             className={`record-btn ${isRecording ? 'recording' : ''}`}
             onClick={toggleRecording}
+            disabled={!recognitionRef.current && !isRecording}
           >
             {isRecording ? '⏹' : '🎤'}
           </button>
+          
+          {isRecording && (
+            <div className="recording-timer">{formatTime(recordingTime)}</div>
+          )}
+          
           <p className="status">{status}</p>
+          
+          <p className="hint">
+            {isRecording ? 'Tap ⏹ when done' : 'Tap the mic and speak naturally'}
+          </p>
         </div>
         
         <div className="notes-section">
@@ -197,7 +223,7 @@ function App() {
       </div>
       
       <div className="footer">
-        🔒 Audio processed locally • No data stored
+        🔒 Audio stays on your device • No data stored
       </div>
       
       {showToast && (
