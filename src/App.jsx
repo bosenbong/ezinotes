@@ -84,9 +84,12 @@ export default function App() {
   }
 
   const toggle = () => {
+    alert('toggle called, isRecording=' + isRecording)
     if (isRecording) {
+      alert('calling stopRecording')
       stopRecording()
     } else {
+      alert('calling startRecording')
       startRecording()
     }
   }
