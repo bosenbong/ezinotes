@@ -144,6 +144,10 @@
       background: #1dd1a1;
       color: #1a1a2e;
     }
+    .share-btn {
+      background: #a55eea;
+      color: white;
+    }
     .action-btn:hover { transform: scale(1.02); }
     
     .footer {
@@ -184,8 +188,12 @@
 // Click "Make My Game" to generate...</pre>
       <div class="actions">
         <button class="action-btn copy-btn" onclick="copyCode()">📋 Copy</button>
-        <button class="action-btn play-btn" onclick="goToEditor()">▶ Play in p5.js</button>
+        <button class="action-btn play-btn" onclick="goToEditor()">▶ Play</button>
+        <button class="action-btn share-btn" onclick="shareGame()" style="background:#a55eea;color:white;">🔗 Share</button>
       </div>
+      <div id="shareLink" style="display:none;margin-top:15px;padding:12px;background:#222;border-radius:10px;font-size:13px;">
+        <span style="color:#48dbfb;">Share this link:</span>
+        <input type="text" id="shareInput" readonly style="width:100%;margin-top:8px;padding:10px;background:#333;border:none;border-radius:8px;color:#aaa;font-size:12px;" />
     </div>
     
     <div class="footer">
@@ -257,6 +265,37 @@
         alert('Code copied! Paste it into the p5.js editor.');
       }
     }
+    
+    function shareGame() {
+      if (!lastCode) {
+        alert('Make a game first!');
+        return;
+      }
+      // Encode code to base64 for sharing
+      const encoded = btoa(unescape(encodeURIComponent(lastCode)));
+      const shareUrl = 'https://ezinotes.vercel.app/game.html?code=' + encoded;
+      
+      document.getElementById('shareLink').style.display = 'block';
+      document.getElementById('shareInput').value = shareUrl;
+      document.getElementById('shareInput').select();
+      navigator.clipboard.writeText(shareUrl);
+      alert('Share link copied to clipboard!');
+    }
+    
+    // Check for shared code in URL
+    window.onload = function() {
+      const params = new URLSearchParams(window.location.search);
+      const sharedCode = params.get('code');
+      if (sharedCode) {
+        try {
+          lastCode = decodeURIComponent(escape(atob(sharedCode)));
+          document.getElementById('code').textContent = lastCode;
+          document.getElementById('prompt').value = 'Shared game from friend!';
+        } catch(e) {
+          console.log('Could not load shared code');
+        }
+      }
+    };
   </script>
 </body>
 </html>
