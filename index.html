@@ -165,11 +165,31 @@
           
           const btn = document.createElement('button');
           btn.id = 'polishBtn';
-          btn.textContent = '✨ Polish with My GPT';
+          btn.textContent = '✨ Polish Note (AI)';
           btn.style.cssText = 'margin-top:12px;padding:12px 20px;background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;width:100%;';
-          btn.onclick = () => {
-            const text = encodeURIComponent('Please convert this voice note into a professional NDIS session note: ' + fullTranscript);
-            window.open('https://chatgpt.com/g/g-p-6834279196c88191a9206d9a6f67f036-ndis-apt-notes?text=' + text, '_blank');
+          btn.onclick = async () => {
+            btn.textContent = '⏳ Polishing...';
+            btn.disabled = true;
+            try {
+              const res = await fetch('/api/polish', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ transcript: fullTranscript })
+              });
+              const data = await res.json();
+              if (data.polishedNote) {
+                noteBox.textContent = data.polishedNote;
+                show('Note polished!');
+              } else {
+                show('Error: ' + (data.error || 'Failed'));
+                btn.textContent = '✨ Polish Note (AI)';
+                btn.disabled = false;
+              }
+            } catch(e) {
+              show('Error: ' + e.message);
+              btn.textContent = '✨ Polish Note (AI)';
+              btn.disabled = false;
+            }
           };
           noteBox.parentNode.insertBefore(btn, noteBox.nextSibling);
         }
