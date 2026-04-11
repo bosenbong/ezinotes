@@ -144,6 +144,15 @@
         };
         
         recognition.onend = () => {
+          // Show the formatted note when recording ends
+          if (fullTranscript) {
+            noteBox.textContent = fmtNote(fullTranscript);
+            statusEl.textContent = 'Note ready!';
+            show('Done!');
+          } else {
+            statusEl.textContent = 'No speech detected';
+            show('Try again');
+          }
           if (isRecording) try { recognition.start(); } catch(e) {}
         };
         
@@ -154,6 +163,7 @@
         }
       }
     };
+  </script>
   </script>
 </body>
 </html>
