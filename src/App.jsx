@@ -1,16 +1,16 @@
 import { useState, useRef } from 'react'
 
 export default function App() {
+  const mediaRecorderRef = useRef(null)
   const timerRef = useRef(null)
+  const chunksRef = useRef([])
+  
   const [isRecording, setIsRecording] = useState(false)
   const [transcript, setTranscript] = useState('')
   const [status, setStatus] = useState('Tap the mic to start')
   const [showToast, setShowToast] = useState(false)
   const [toastMsg, setToastMsg] = useState('')
   const [recordingTime, setRecordingTime] = useState(0)
-  
-  let mediaRecorder = null
-  let chunks = []
 
   const show = (msg) => {
     setToastMsg(msg)
@@ -21,24 +21,23 @@ export default function App() {
   const startRecording = async () => {
     try {
       setStatus('Starting...')
+      chunksRef.current = []
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      show('Mic granted!')
+      show('Mic on!')
       
-      mediaRecorder = new MediaRecorder(stream)
-      chunks = []
+      mediaRecorderRef.current = new MediaRecorder(stream)
       
-      mediaRecorder.ondataavailable = e => {
-        if (e.data.size > 0) chunks.push(e.data)
+      mediaRecorderRef.current.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data)
       }
       
-      mediaRecorder.onstop = async () => {
+      mediaRecorderRef.current.onstop = async () => {
         stream.getTracks().forEach(t => t.stop())
         setStatus('Processing...')
         show('Transcribing...')
         
-        // Send to API
         const formData = new FormData()
-        formData.append('audio', new Blob(chunks), 'audio.webm')
+        formData.append('audio', new Blob(chunksRef.current), 'audio.webm'))
         
         try {
           const res = await fetch('/api/transcribe', {
@@ -50,7 +49,7 @@ export default function App() {
           if (data.transcript) {
             setTranscript(data.transcript)
             setStatus('Done!')
-            show('Note created!')
+            show('Note ready!')
           } else {
             setStatus('Try again')
             show('Error: ' + (data.error || 'Failed'))
@@ -61,10 +60,9 @@ export default function App() {
         }
       }
       
-      mediaRecorder.start()
+      mediaRecorderRef.current.start()
       setIsRecording(true)
       setStatus('Recording... speak now')
-      show('Recording...')
       
       timerRef.current = setInterval(() => {
         setRecordingTime(t => t + 1)
@@ -77,8 +75,8 @@ export default function App() {
   }
 
   const stopRecording = () => {
-    if (mediaRecorder) {
-      mediaRecorder.stop()
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop()
       setIsRecording(false)
       clearInterval(timerRef.current)
       setRecordingTime(0)
@@ -138,15 +136,12 @@ export default function App() {
         overflow: 'hidden',
         boxShadow: '0 25px 50px rgba(0,0,0,0.25)'
       }}>
-        {/* Header */}
         <div style={{ background: '#2563eb', color: 'white', padding: '24px', textAlign: 'center' }}>
           <h1 style={{ fontSize: '24px', margin: 0 }}>📝 EziNotes</h1>
           <p style={{ margin: '4px 0 0', opacity: 0.9, fontSize: '14px' }}>Voice to NDIS notes</p>
         </div>
 
-        {/* Content */}
         <div style={{ padding: '24px' }}>
-          {/* Record Button */}
           <div style={{ textAlign: 'center', marginBottom: '24px' }}>
             <button
               onClick={toggle}
@@ -160,7 +155,6 @@ export default function App() {
                 fontSize: '48px',
                 cursor: 'pointer',
                 boxShadow: '0 10px 25px rgba(37,99,235,0.4)',
-                transition: 'transform 0.2s'
               }}
             >
               {isRecording ? '⏹' : '🎤'}
@@ -178,7 +172,6 @@ export default function App() {
             </p>
           </div>
 
-          {/* Note Output */}
           <div>
             <h3 style={{ fontSize: '14px', color: '#666', textTransform: 'uppercase', marginBottom: '12px' }}>
               Your Note
@@ -205,13 +198,11 @@ export default function App() {
           </div>
         </div>
 
-        {/* Footer */}
         <div style={{ padding: '16px', textAlign: 'center', borderTop: '1px solid #e5e7eb', fontSize: '12px', color: '#666' }}>
           🔒 Audio stays on device • No data stored
         </div>
       </div>
 
-      {/* Toast */}
       {showToast && (
         <div style={{
           position: 'fixed',
