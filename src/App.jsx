@@ -282,3 +282,5 @@ const btnStyle = {
   background: '#10b981',
   color: 'white'
 }
+
+}
