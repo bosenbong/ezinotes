@@ -1,4 +1,4 @@
-// EziNotes API - Polish note with AI
+// EziNotes API - Polish note with AI (OpenAI)
 
 export const runtime = 'nodejs'
 
@@ -10,23 +10,24 @@ export async function POST(request) {
       return Response.json({ error: 'No transcript provided' }, { status: 400 })
     }
     
-    const apiKey = process.env.OPENROUTER_API_KEY
+    const apiKey = process.env.OPENAI_API_KEY || process.env.OPENROUTER_API_KEY
     
     if (!apiKey) {
       return Response.json({ error: 'API not configured' }, { status: 500 })
     }
     
-    // Use GPT-4 to polish the note
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    // Try OpenAI first, then OpenRouter
+    let url = 'https://api.openai.com/v1/chat/completions'
+    let headers = {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    }
+    
+    const response = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://ezinotes.vercel.app',
-        'X-Title': 'EziNotes'
-      },
+      headers,
       body: JSON.stringify({
-        model: 'openai/gpt-4o',
+        model: 'gpt-4o',
         messages: [
           {
             role: 'system',
