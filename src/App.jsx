@@ -147,7 +147,7 @@ export default function App() {
         <div style={{ padding: '24px' }}>
           <div style={{ textAlign: 'center', marginBottom: '24px' }}>
             <button
-              onClick={toggle}
+              onClick={isRecording ? () => { alert('stopping'); stopRecording() } : () => { alert('starting'); startRecording() }}
               style={{
                 width: '120px',
                 height: '120px',
