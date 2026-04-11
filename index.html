@@ -130,9 +130,18 @@
         recognition.onresult = (e) => {
           let final = '', interim = '';
           for (let i = e.resultIndex; i < e.results.length; i++) {
-            const t = e.results[i][0].transcript;
-            if (e.results[i].isFinal) final += t + ' ';
-            else interim += t;
+            const t = e.results[i][0].transcript.trim();
+            if (!t) continue;
+            if (e.results[i].isFinal) {
+              // Deduplicate - only add if not already at end of transcript
+              const cleanT = t.toLowerCase();
+              const existingEnd = fullTranscript.trim().toLowerCase();
+              if (!existingEnd.endsWith(cleanT) && !existingEnd.includes(cleanT + ' ' + cleanT)) {
+                final += t + ' ';
+              }
+            } else {
+              interim += t;
+            }
           }
           if (final) fullTranscript += final;
           if (interim) statusEl.textContent = 'Listening: ' + interim.substring(0,30) + '...';
