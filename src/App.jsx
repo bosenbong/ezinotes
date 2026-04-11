@@ -1,9 +1,7 @@
 import { useState, useRef } from 'react'
 
 export default function App() {
-  const mediaRecorderRef = useRef(null)
   const timerRef = useRef(null)
-  const chunksRef = useRef([])
   
   const [isRecording, setIsRecording] = useState(false)
   const [transcript, setTranscript] = useState('')
@@ -12,74 +10,94 @@ export default function App() {
   const [toastMsg, setToastMsg] = useState('')
   const [recordingTime, setRecordingTime] = useState(0)
 
+  const recognitionRef = useRef(null)
+
   const show = (msg) => {
     setToastMsg(msg)
     setShowToast(true)
     setTimeout(() => setShowToast(false), 3000)
   }
 
-  const startRecording = async () => {
-    try {
-      setStatus('Starting...')
-      chunksRef.current = []
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      show('Mic on!')
-      
-      mediaRecorderRef.current = new MediaRecorder(stream)
-      
-      mediaRecorderRef.current.ondataavailable = (e) => {
-        if (e.data.size > 0) chunksRef.current.push(e.data)
-      }
-      
-      mediaRecorderRef.current.onstop = async () => {
-        stream.getTracks().forEach(t => t.stop())
-        setStatus('Processing...')
-        show('Transcribing...')
-        
-        const formData = new FormData()
-        formData.append('audio', new Blob(chunksRef.current), 'audio.webm')
-        
-        try {
-          const res = await fetch('/api/transcribe', {
-            method: 'POST',
-            body: formData
-          })
-          const data = await res.json()
-          
-          if (data.transcript) {
-            setTranscript(data.transcript)
-            setStatus('Done!')
-            show('Note ready!')
-          } else {
-            setStatus('Try again')
-            show('Error: ' + (data.error || 'Failed'))
-          }
-        } catch (e) {
-          setStatus('Error')
-          show('Error: ' + e.message)
-        }
-      }
-      
-      mediaRecorderRef.current.start()
+  const startRecording = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    
+    if (!SpeechRecognition) {
+      setStatus('Speech not supported on this browser')
+      show('Try Chrome on desktop')
+      return
+    }
+    
+    const recognition = new SpeechRecognition()
+    recognition.continuous = true
+    recognition.interimResults = true
+    recognitionRef.current = recognition
+    
+    recognition.onstart = () => {
       setIsRecording(true)
       setStatus('Recording... speak now')
+      show('Recording...')
       
       timerRef.current = setInterval(() => {
         setRecordingTime(t => t + 1)
       }, 1000)
+    }
+    
+    recognition.onresult = (event) => {
+      let final = ''
+      let interim = ''
       
-    } catch (e) {
-      setStatus('Error: ' + e.message)
-      show('Mic error: ' + e.message)
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript
+        if (event.results[i].isFinal) {
+          final += transcript + ' '
+        } else {
+          interim += transcript
+        }
+      }
+      
+      if (final) {
+        setTranscript(prev => prev + final)
+      }
+      if (interim) {
+        setStatus('Listening: ' + interim.substring(0, 30) + '...')
+      }
+    }
+    
+    recognition.onerror = (event) => {
+      setStatus('Error: ' + event.error)
+      show('Error: ' + event.error)
+      setIsRecording(false)
+      clearInterval(timerRef.current)
+    }
+    
+    recognition.onend = () => {
+      if (isRecording) {
+        try { recognition.start() } catch(e) {}
+      }
+    }
+    
+    try {
+      recognition.start()
+    } catch(e) {
+      setStatus('Error starting: ' + e.message)
     }
   }
 
   const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop()
-      setIsRecording(false)
-      if (timerRef.current) clearInterval(timerRef.current)
-      setRecordingTime(0)
+    if (recognitionRef.current) {
+      recognitionRef.current.stop()
+      recognitionRef.current = null
+    }
+    setIsRecording(false)
+    clearInterval(timerRef.current)
+    setRecordingTime(0)
+    
+    if (transcript) {
+      setStatus('Done!')
+      show('Note ready!')
+    } else {
+      setStatus('No speech detected')
+      show('Try again')
     }
   }
 
@@ -111,6 +129,11 @@ export default function App() {
     a.click()
     URL.revokeObjectURL(url)
     show('Saved!')
+  }
+
+  const clearNote = () => {
+    setTranscript('')
+    setStatus('Tap the mic to start')
   }
 
   return (
@@ -160,7 +183,7 @@ export default function App() {
             
             <p style={{ marginTop: '12px', color: '#666' }}>{status}</p>
             <p style={{ fontSize: '12px', color: '#999' }}>
-              {isRecording ? 'Tap to stop' : 'Tap mic and speak'}
+              {isRecording ? 'Tap to stop' : 'Tap mic and speak (try Chrome)'}
             </p>
           </div>
 
@@ -185,6 +208,7 @@ export default function App() {
               <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
                 <button onClick={save} style={btnStyle}>💾 Save</button>
                 <button onClick={copy} style={btnStyle}>📋 Copy</button>
+                <button onClick={clearNote} style={{...btnStyle, background: '#6b7280'}}>🗑️ Clear</button>
               </div>
             )}
           </div>
