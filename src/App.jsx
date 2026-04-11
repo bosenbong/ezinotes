@@ -67,8 +67,12 @@ function App() {
       }
 
       alert('Creating MediaRecorder...')
-      mediaRecorder.start()
-      alert('MediaRecorder started!')
+      try {
+        mediaRecorder.start()
+        alert('Started! Recording now')
+      } catch(e) {
+        alert('Start error: ' + e.message)
+      }
       setIsRecording(true)
       setStatus('🔴 Recording... Speak now')
       
