@@ -15,7 +15,7 @@ const formatNDISNote = (transcript) => {
 }
 
 function App() {
-  console.log('App rendering...')
+  const [debug, setDebug] = useState('Loading...')
   const [isRecording, setIsRecording] = useState(false)
   const [transcript, setTranscript] = useState('')
   const [status, setStatus] = useState('Tap the mic to start')
@@ -156,6 +156,7 @@ function App() {
 
   return (
     <div className="app">
+      <div style={{padding:10,background:'red',color:'white'}}>{debug}</div>
       <div className="header">
         <h1>📝 EziNotes</h1>
         <p>Voice to NDIS notes in seconds</p>
