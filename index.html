@@ -191,6 +191,36 @@
             btn.disabled = false;
           };
           noteBox.parentNode.insertBefore(btn, noteBox.nextSibling);
+          
+          // Add Copy and Save buttons
+          const btnRow = document.createElement('div');
+          btnRow.style.cssText = 'display:flex;gap:12px;margin-top:12px;';
+          
+          const copyBtn = document.createElement('button');
+          copyBtn.textContent = '📋 Copy';
+          copyBtn.style.cssText = 'flex:1;padding:12px;background:#3b82f6;color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;';
+          copyBtn.onclick = () => {
+            navigator.clipboard.writeText(noteBox.textContent);
+            show('Copied!');
+          };
+          
+          const saveBtn = document.createElement('button');
+          saveBtn.textContent = '💾 Save';
+          saveBtn.style.cssText = 'flex:1;padding:12px;background:#10b981;color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;';
+          saveBtn.onclick = () => {
+            const blob = new Blob([noteBox.textContent], {type: 'text/plain'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'note-' + new Date().toISOString().split('T')[0] + '.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+            show('Saved!');
+          };
+          
+          btnRow.appendChild(copyBtn);
+          btnRow.appendChild(saveBtn);
+          noteBox.parentNode.insertBefore(btnRow, btnRow.nextSibling);
         }
         
         try {
