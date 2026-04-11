@@ -36,19 +36,17 @@ function App() {
   const startRecording = async () => {
     setStatus('🔄 Starting...')
     showToastMsg('Starting...')
-    alert('Starting recording!')
     
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       setStatus('❌ Not supported on this device')
-      alert('Not supported on this device')
+      showToastMsg('Not supported on this device')
       return
     }
     
     try {
       setStatus('🔄 Requesting mic...')
-      alert('Requesting mic...')
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      alert('Mic granted!')
+      showToastMsg('Mic granted!')
       
       const mediaRecorder = new MediaRecorder(stream)
       mediaRecorderRef.current = mediaRecorder
@@ -66,12 +64,11 @@ function App() {
         showToastMsg('Recording saved!')
       }
 
-      alert('Creating MediaRecorder...')
+      showToastMsg('Starting recorder...')
       try {
         mediaRecorder.start()
-        alert('Started! Recording now')
       } catch(e) {
-        alert('Start error: ' + e.message)
+        showToastMsg('Start error: ' + e.message)
       }
       setIsRecording(true)
       setStatus('🔴 Recording... Speak now')
