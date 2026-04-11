@@ -21,7 +21,7 @@ function App() {
   const [showToast, setShowToast] = useState(false)
   const [toastMessage, setToastMessage] = useState('')
   const [recordingTime, setRecordingTime] = useState(0)
-  const [audioBlob, setAudioBlob] = useState(null)
+  
   
   const mediaRecorderRef = useRef(null)
   const timerRef = useRef(null)
@@ -56,12 +56,37 @@ function App() {
         if (e.data.size > 0) chunksRef.current.push(e.data)
       }
 
-      mediaRecorder.onstop = () => {
+      mediaRecorder.onstop = async () => {
         const blob = new Blob(chunksRef.current, { type: 'audio/webm' })
-        setAudioBlob(blob)
         stream.getTracks().forEach(t => t.stop())
-        setStatus('✅ Audio recorded!')
-        showToastMsg('Recording saved!')
+        
+        setStatus('⏳ Transcribing...')
+        showToastMsg('Transcribing...')
+        
+        try {
+          const formData = new FormData()
+          formData.append('audio', blob, 'recording.webm')
+          
+          const response = await fetch('/api/transcribe', {
+            method: 'POST',
+            body: formData
+          })
+          
+          const data = await response.json()
+          
+          if (data.formattedNote) {
+            setTranscript(data.transcript)
+            setStatus('✅ Note ready!')
+            showToastMsg('Done!')
+          } else {
+            setStatus('⚠️ Could not transcribe')
+            showToastMsg('Try again')
+          }
+        } catch (e) {
+          console.error('Error:', e)
+          setStatus('❌ Failed')
+          showToastMsg('Error')
+        }
       }
 
       showToastMsg('Starting recorder...')
@@ -126,7 +151,7 @@ function App() {
   }
 
   const formattedNote = formatNDISNote(transcript)
-  const hasContent = transcript.trim().length > 0 || audioBlob
+  const hasContent = transcript.trim().length > 0
 
   return (
     <div className="app">
