@@ -124,7 +124,8 @@ export default function App() {
     cleaned = cleaned.charAt(0).toUpperCase() + cleaned.slice(1)
     
     // Format as detailed NDIS note matching what Jarrad expects
-    return `Date/Time: ${startTime} – ${endTime}
+    return `Client: [Name]
+Date/Time: ${startTime} – ${endTime}
 Service Type: Social & Domestic Support / Transport
 
 ACTIVITIES UNDERTAKEN:
