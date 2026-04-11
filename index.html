@@ -146,15 +146,33 @@
         recognition.onend = () => {
           // Show the formatted note when recording ends
           if (fullTranscript) {
-            noteBox.textContent = fmtNote(fullTranscript);
+            const formatted = fmtNote(fullTranscript);
+            noteBox.textContent = formatted;
             statusEl.textContent = 'Note ready!';
             show('Done!');
+            // Add polish button
+            addPolishButton();
           } else {
             statusEl.textContent = 'No speech detected';
             show('Try again');
           }
           if (isRecording) try { recognition.start(); } catch(e) {}
         };
+        
+        function addPolishButton() {
+          const existing = document.getElementById('polishBtn');
+          if (existing) return;
+          
+          const btn = document.createElement('button');
+          btn.id = 'polishBtn';
+          btn.textContent = '✨ Polish with My GPT';
+          btn.style.cssText = 'margin-top:12px;padding:12px 20px;background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;width:100%;';
+          btn.onclick = () => {
+            const text = encodeURIComponent('Please convert this voice note into a professional NDIS session note: ' + fullTranscript);
+            window.open('https://chatgpt.com/g/g-p-6834279196c88191a9206d9a6f67f036-ndis-apt-notes?text=' + text, '_blank');
+          };
+          noteBox.parentNode.insertBefore(btn, noteBox.nextSibling);
+        }
         
         try {
           recognition.start();
