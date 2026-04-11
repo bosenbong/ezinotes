@@ -9,7 +9,8 @@ export default defineConfig({
         main: './index.html',
         game: './game.html',
         rage: './rage.html',
-        fever: './fever.html'
+        fever: './fever.html',
+        fever3d: './fever3d.html'
       }
     }
   },
