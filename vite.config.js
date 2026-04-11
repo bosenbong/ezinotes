@@ -8,7 +8,8 @@ export default defineConfig({
       input: {
         main: './index.html',
         game: './game.html',
-        rage: './rage.html'
+        rage: './rage.html',
+        fever: './fever.html'
       }
     }
   },
