@@ -66,7 +66,9 @@ function App() {
         showToastMsg('Recording saved!')
       }
 
+      alert('Creating MediaRecorder...')
       mediaRecorder.start()
+      alert('MediaRecorder started!')
       setIsRecording(true)
       setStatus('🔴 Recording... Speak now')
       
