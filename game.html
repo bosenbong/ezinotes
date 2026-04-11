@@ -2,118 +2,200 @@
 <html>
 <head>
   <title>AI Game Maker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { 
-      font-family: system-ui, sans-serif;
-      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      font-family: system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
       min-height: 100vh;
-      padding: 20px;
       color: white;
     }
-    .container { max-width: 700px; margin: 0 auto; }
-    h1 { text-align: center; margin-bottom: 10px; }
-    p { text-align: center; color: #888; margin-bottom: 30px; }
+    .app {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .header h1 {
+      font-size: 36px;
+      background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: glow 2s ease-in-out infinite;
+    }
+    @keyframes glow {
+      0%, 100% { filter: brightness(1); }
+      50% { filter: brightness(1.3); }
+    }
+    .header p { color: #888; margin-top: 5px; }
+    
+    .category-section {
+      margin-bottom: 20px;
+    }
+    .category-title {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .categories {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .cat-btn {
+      padding: 10px 16px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 20px;
+      color: #ccc;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .cat-btn:hover, .cat-btn.active {
+      background: linear-gradient(90deg, #ff6b6b, #feca57);
+      color: #1a1a2e;
+      border: none;
+    }
     
     .input-area {
-      background: #0f0f23;
+      background: rgba(0,0,0,0.3);
       padding: 20px;
-      border-radius: 16px;
-      display: flex;
-      gap: 10px;
+      border-radius: 20px;
+      margin-bottom: 20px;
     }
     
     input {
-      flex: 1;
-      padding: 15px;
+      width: 100%;
+      padding: 18px;
       border: none;
-      border-radius: 10px;
+      border-radius: 14px;
       font-size: 16px;
       background: #1e1e3f;
       color: white;
+      margin-bottom: 12px;
     }
     
-    button {
-      padding: 15px 25px;
-      background: linear-gradient(135deg, #f093fb, #f5576c);
+    button.make-btn {
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(90deg, #ff6b6b, #feca57);
       border: none;
-      border-radius: 10px;
-      color: white;
-      font-size: 16px;
+      border-radius: 14px;
+      color: #1a1a2e;
+      font-size: 18px;
       font-weight: bold;
       cursor: pointer;
+      transition: transform 0.2s;
     }
+    button.make-btn:hover { transform: scale(1.02); }
+    button.make-btn:disabled { opacity: 0.5; }
     
-    button:disabled { opacity: 0.5; }
-    
-    #output {
-      margin-top: 30px;
-      background: #0f0f23;
-      border-radius: 16px;
+    .output {
+      background: rgba(0,0,0,0.3);
+      border-radius: 20px;
       padding: 20px;
       min-height: 300px;
     }
-    
-    #output h3 { margin-bottom: 15px; color: #f093fb; }
-    #output pre {
-      background: #1e1e3f;
-      padding: 15px;
-      border-radius: 10px;
-      overflow-x: auto;
-      white-space: pre-wrap;
-      font-size: 12px;
-    }
-    
-    #playBtn {
-      display: none;
-      margin-top: 15px;
-      background: linear-gradient(135deg, #4facfe, #00f2fe);
-    }
-    
-    .examples {
-      margin-top: 20px;
+    .output h3 {
+      color: #feca57;
+      margin-bottom: 15px;
       display: flex;
-      flex-wrap: wrap;
+      align-items: center;
       gap: 10px;
-      justify-content: center;
     }
-    
-    .example-btn {
-      padding: 8px 15px;
-      background: #1e1e3f;
-      border: 1px solid #333;
-      border-radius: 20px;
-      color: #aaa;
+    pre {
+      background: #1a1a2e;
+      padding: 15px;
+      border-radius: 12px;
+      overflow-x: auto;
       font-size: 12px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    .action-btn {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
       cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .copy-btn {
+      background: #48dbfb;
+      color: #1a1a2e;
+    }
+    .play-btn {
+      background: #1dd1a1;
+      color: #1a1a2e;
+    }
+    .action-btn:hover { transform: scale(1.02); }
+    
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      color: #555;
+      font-size: 12px;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🎮 AI Game Maker</h1>
-    <p>Tell AI what game to make, and it writes the code!</p>
+  <div class="app">
+    <div class="header">
+      <h1>🎮 AI Game Maker</h1>
+      <p>Type an idea, get a playable game!</p>
+    </div>
+    
+    <div class="category-section">
+      <div class="category-title">Quick Ideas</div>
+      <div class="categories">
+        <button class="cat-btn" onclick="fillPrompt('make a jumping game with platforms and powerups')">🏃 Platformer</button>
+        <button class="cat-btn" onclick="fillPrompt('make a space shooter with enemies and upgrades')">🚀 Space Shooter</button>
+        <button class="cat-btn" onclick="fillPrompt('make a snake game that grows when eating')">🐍 Snake</button>
+        <button class="cat-btn" onclick="fillPrompt('make a racing game with boost pads')">🏎️ Racing</button>
+        <button class="cat-btn" onclick="fillPrompt('make a puzzle game matching colors')">🧩 Puzzle</button>
+        <button class="cat-btn" onclick="fillPrompt('make an endless runner with obstacles')">🏃 Runner</button>
+      </div>
+    </div>
     
     <div class="input-area">
-      <input type="text" id="prompt" placeholder="e.g., make a jumping game where you avoid obstacles" />
-      <button onclick="makeGame()" id="makeBtn">Make My Game!</button>
+      <input type="text" id="prompt" placeholder="Describe your game idea..." />
+      <button class="make-btn" onclick="makeGame()" id="makeBtn">✨ Make My Game!</button>
     </div>
     
-    <div class="examples">
-      <button class="example-btn" onclick="fillPrompt('make a game where you catch falling stars')">⭐ Catch Stars</button>
-      <button class="example-btn" onclick="fillPrompt('make a racing game with obstacles to avoid')">🏎️ Racing</button>
-      <button class="example-btn" onclick="fillPrompt('make a snake game')">🐍 Snake</button>
-      <button class="example-btn" onclick="fillPrompt('make a space shooter game')">🚀 Space Shooter</button>
+    <div class="output">
+      <h3>📦 Your Game Code</h3>
+      <pre id="code">// Your game code will appear here!
+// Click "Make My Game" to generate...</pre>
+      <div class="actions">
+        <button class="action-btn copy-btn" onclick="copyCode()">📋 Copy</button>
+        <button class="action-btn play-btn" onclick="goToEditor()">▶ Play in p5.js</button>
+      </div>
     </div>
     
-    <div id="output">
-      <h3>Your Game Code:</h3>
-      <pre id="code">// Your game code will appear here after AI generates it!</pre>
-      <button id="playBtn" onclick="copyCode()">📋 Copy Code</button>
+    <div class="footer">
+      Made by Henry 🚀 | Powered by AI
     </div>
   </div>
 
   <script>
+    let lastCode = '';
+    
     function fillPrompt(text) {
       document.getElementById('prompt').value = text;
     }
@@ -122,16 +204,15 @@
       const prompt = document.getElementById('prompt').value;
       const btn = document.getElementById('makeBtn');
       const codeEl = document.getElementById('code');
-      const playBtn = document.getElementById('playBtn');
       
       if (!prompt.trim()) {
         alert('Please type a game idea first!');
         return;
       }
       
-      btn.textContent = '🤔 AI is thinking...';
+      btn.textContent = '🤔 AI is creating your game...';
       btn.disabled = true;
-      codeEl.textContent = 'Generating your game...';
+      codeEl.textContent = 'Generating...';
       
       try {
         const response = await fetch('https://ezinotes.vercel.app/api/makergame', {
@@ -143,8 +224,16 @@
         const data = await response.json();
         
         if (data.gameCode) {
-          codeEl.textContent = data.gameCode;
-          playBtn.style.display = 'inline-block';
+          // Clean up the code
+          let code = data.gameCode;
+          // Remove markdown code blocks if present
+          code = code.replace(/```javascript\n/g, '');
+          code = code.replace(/```\n/g, '');
+          code = code.replace(/```js\n/g, '');
+          code = code.replace(/```/g, '');
+          
+          lastCode = code;
+          codeEl.textContent = code;
         } else {
           codeEl.textContent = 'Error: ' + (data.error || 'Something went wrong');
         }
@@ -152,14 +241,21 @@
         codeEl.textContent = 'Error: ' + e.message;
       }
       
-      btn.textContent = 'Make My Game!';
+      btn.textContent = '✨ Make My Game!';
       btn.disabled = false;
     }
 
     function copyCode() {
-      const code = document.getElementById('code').textContent;
-      navigator.clipboard.writeText(code);
-      alert('Code copied! Now paste it into p5.js editor to play!');
+      navigator.clipboard.writeText(lastCode);
+      alert('Code copied! Paste it into p5.js editor to play.');
+    }
+    
+    function goToEditor() {
+      if (lastCode) {
+        navigator.clipboard.writeText(lastCode);
+        window.open('https://editor.p5js.org', '_blank');
+        alert('Code copied! Paste it into the p5.js editor.');
+      }
     }
   </script>
 </body>
