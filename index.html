@@ -144,19 +144,31 @@
         };
         
         recognition.onend = () => {
-          // Show the formatted note when recording ends
-          if (fullTranscript) {
-            const formatted = fmtNote(fullTranscript);
-            noteBox.textContent = formatted;
-            statusEl.textContent = 'Note ready!';
-            show('Done!');
-            // Add polish button
-            addPolishButton();
-          } else {
-            statusEl.textContent = 'No speech detected';
-            show('Try again');
+          // Only process if we intentionally stopped
+          if (!isRecording) {
+            clearInterval(timer);
+            return;
           }
-          if (isRecording) try { recognition.start(); } catch(e) {}
+          // If still marked as recording but recognition ended unexpectedly, try to restart once
+          try {
+            recognition.start();
+          } catch(e) {
+            // Failed to restart - stop recording cleanly
+            isRecording = false;
+            clearInterval(timer);
+            if (fullTranscript) {
+              const formatted = fmtNote(fullTranscript);
+              noteBox.textContent = formatted;
+              statusEl.textContent = 'Note ready!';
+              show('Done!');
+              addPolishButton();
+            } else {
+              statusEl.textContent = 'No speech detected';
+              show('Try again');
+            }
+            recordBtn.textContent = '🎤';
+            recordBtn.classList.remove('recording');
+          }
         };
         
         function addPolishButton() {
