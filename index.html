@@ -168,6 +168,7 @@
           btn.textContent = '✨ Polish Note (AI)';
           btn.style.cssText = 'margin-top:12px;padding:12px 20px;background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;width:100%;';
           btn.onclick = async () => {
+            const originalText = btn.textContent;
             btn.textContent = '⏳ Polishing...';
             btn.disabled = true;
             try {
@@ -182,14 +183,12 @@
                 show('Note polished!');
               } else {
                 show('Error: ' + (data.error || 'Failed'));
-                btn.textContent = '✨ Polish Note (AI)';
-                btn.disabled = false;
               }
             } catch(e) {
               show('Error: ' + e.message);
-              btn.textContent = '✨ Polish Note (AI)';
-              btn.disabled = false;
             }
+            btn.textContent = originalText;
+            btn.disabled = false;
           };
           noteBox.parentNode.insertBefore(btn, noteBox.nextSibling);
         }
