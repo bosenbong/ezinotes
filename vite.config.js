@@ -10,7 +10,8 @@ export default defineConfig({
         game: './game.html',
         rage: './rage.html',
         fever: './fever.html',
-        fever3d: './fever3d.html'
+        fever3d: './fever3d.html',
+        feverBuild: './fever-build.html'
       }
     }
   },
