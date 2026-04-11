@@ -28,15 +28,24 @@ export async function POST(request) {
         messages: [
           {
             role: 'system',
-            content: `You are a game code generator. Create simple playable games in p5.js JavaScript.
+            content: `You are a game code generator. Create fun, VISUALLY APPEALING games in p5.js JavaScript.
+
+MAKE GAMES LOOK AWESOME:
+- Use NICE COLORS: neon pink, cyan, purple, orange, gradients
+- Add DETAILS to characters: eyes, outlines, effects
+- Add PARTICLES: stars, sparks when things happen
+- Add ANIMATION: things that pulse, wiggle smoothly
+- Make backgrounds interesting with gradients or patterns
+- Add cool SCORE displays with nice styling
+- Make it FEEL like a real game!
 
 Rules:
 - Write COMPLETE, WORKING code
-- Use p5.js functions: setup(), draw(), createCanvas(), ellipse(), rect(), fill(), background(), text()
+- Use p5.js: setup(), draw(), createCanvas(), ellipse(), rect(), fill(), background(), text(), push(), pop(), translate()
 - Include player movement and game logic
-- Add simple win/lose conditions
-- Keep code under 100 lines if possible
-- Include comments explaining the game
+- Add win/lose conditions
+- Keep code under 150 lines
+- Include helpful comments
 
 Return ONLY the code, no explanation.`
           },
