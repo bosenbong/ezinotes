@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>BeatBox</title>
+  <style>
+    body { background: #111; color: white; font-family: sans-serif; text-align: center; padding: 50px; }
+    h1 { color: #ff6b6b; }
+    .pad { width: 100px; height: 100px; margin: 10px; border-radius: 15px; border: none; font-size: 30px; cursor: pointer; }
+    .p1 { background: #ff6b6b; } .p2 { background: #4ecdc4; }
+    .p3 { background: #ffe66d; } .p4 { background: #95e1d3; }
+    .btn { padding: 15px 30px; margin: 10px; border-radius: 10px; border: none; font-size: 16px; cursor: pointer; }
+    .play { background: #4ecdc4; color: white; }
+    .stop { background: #ff6b6b; color: white; }
+  </style>
+</head>
+<body>
+  <h1>🥁 BeatBox</h1>
+  <p>Tap pads to make beats!</p>
+  <button class="pad p1" onclick="kick()">🥁</button>
+  <button class="pad p2" onclick="snare()">🎹</button>
+  <button class="pad p3" onclick="hat()">🎸</button>
+  <button class="pad p4" onclick="bass()">🔊</button>
+  <br>
+  <button class="btn play" onclick="play()">▶ Play</button>
+  <button class="btn stop" onclick="stop()">⏹ Stop</button>
+  <script>
+    let c = new (window.AudioContext || window.webkitAudioContext)();
+    let p = [];
+    let playing = false;
+    function t(f, d) {
+      let o = c.createOscillator();
+      let g = c.createGain();
+      o.connect(g); g.connect(c.destination);
+      o.frequency.value = f;
+      g.gain.value = 0.5;
+      g.gain.exponentialRampToValueAtTime(0.01, c.currentTime + d);
+      o.start(); o.stop(c.currentTime + d);
+    }
+    function kick() { t(150, 0.3); p.push('k'); }
+    function snare() { t(400, 0.2); p.push('s'); }
+    function hat() { t(800, 0.1); p.push('h'); }
+    function bass() { t(80, 0.3); p.push('b'); }
+    function play() {
+      if (!c) c = new AudioContext();
+      playing = true; let i = 0;
+      setInterval(() => { if (!playing) return; 
+        if (p[i]=='k') kick(); if (p[i]=='s') snare(); 
+        if (p[i]=='h') hat(); if (p[i]=='b') bass();
+        i = (i + 1) % p.length;
+      }, 400);
+    }
+    function stop() { playing = false; p = []; }
+  </script>
+</body>
+</html>
