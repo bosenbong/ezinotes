@@ -78,19 +78,8 @@ export default function App() {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop()
       setIsRecording(false)
-      clearInterval(timerRef.current)
+      if (timerRef.current) clearInterval(timerRef.current)
       setRecordingTime(0)
-    }
-  }
-
-  const toggle = () => {
-    alert('toggle called, isRecording=' + isRecording)
-    if (isRecording) {
-      alert('calling stopRecording')
-      stopRecording()
-    } else {
-      alert('calling startRecording')
-      startRecording()
     }
   }
 
@@ -147,7 +136,7 @@ export default function App() {
         <div style={{ padding: '24px' }}>
           <div style={{ textAlign: 'center', marginBottom: '24px' }}>
             <button
-              onClick={isRecording ? () => { alert('stopping'); stopRecording() } : () => { alert('starting'); startRecording() }}
+              onClick={isRecording ? stopRecording : startRecording}
               style={{
                 width: '120px',
                 height: '120px',
