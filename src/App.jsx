@@ -15,6 +15,7 @@ const formatNDISNote = (transcript) => {
 }
 
 function App() {
+  console.log('App rendering...')
   const [isRecording, setIsRecording] = useState(false)
   const [transcript, setTranscript] = useState('')
   const [status, setStatus] = useState('Tap the mic to start')
