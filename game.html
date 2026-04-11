@@ -11,150 +11,113 @@
       min-height: 100vh;
       color: white;
     }
-    .app {
-      max-width: 500px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-    .header {
-      text-align: center;
-      margin-bottom: 30px;
-    }
+    .app { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { text-align: center; margin-bottom: 20px; }
     .header h1 {
       font-size: 36px;
-      background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
+      background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      animation: glow 2s ease-in-out infinite;
-    }
-    @keyframes glow {
-      0%, 100% { filter: brightness(1); }
-      50% { filter: brightness(1.3); }
     }
     .header p { color: #888; margin-top: 5px; }
     
-    .category-section {
-      margin-bottom: 20px;
+    .input-area {
+      background: rgba(0,0,0,0.3);
+      padding: 15px;
+      border-radius: 16px;
+      margin-bottom: 15px;
     }
-    .category-title {
-      font-size: 14px;
-      color: #666;
+    
+    input {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      background: #1e1e3f;
+      color: white;
       margin-bottom: 10px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
     }
+    
+    button.make-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(90deg, #ff6b6b, #feca57);
+      border: none;
+      border-radius: 10px;
+      color: #1a1a2e;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button.make-btn:disabled { opacity: 0.5; }
+    
     .categories {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
+      margin-bottom: 15px;
     }
     .cat-btn {
-      padding: 10px 16px;
+      padding: 10px 15px;
       background: rgba(255,255,255,0.1);
       border: 1px solid rgba(255,255,255,0.2);
       border-radius: 20px;
       color: #ccc;
       font-size: 13px;
       cursor: pointer;
-      transition: all 0.2s;
     }
-    .cat-btn:hover, .cat-btn.active {
-      background: linear-gradient(90deg, #ff6b6b, #feca57);
-      color: #1a1a2e;
-      border: none;
-    }
+    .cat-btn:hover { background: #feca57; color: #1a1a2e; }
     
-    .input-area {
-      background: rgba(0,0,0,0.3);
-      padding: 20px;
-      border-radius: 20px;
-      margin-bottom: 20px;
-    }
-    
-    input {
-      width: 100%;
-      padding: 18px;
-      border: none;
-      border-radius: 14px;
-      font-size: 16px;
-      background: #1e1e3f;
-      color: white;
-      margin-bottom: 12px;
-    }
-    
-    button.make-btn {
-      width: 100%;
-      padding: 18px;
-      background: linear-gradient(90deg, #ff6b6b, #feca57);
-      border: none;
-      border-radius: 14px;
-      color: #1a1a2e;
-      font-size: 18px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-    button.make-btn:hover { transform: scale(1.02); }
-    button.make-btn:disabled { opacity: 0.5; }
-    
-    .output {
-      background: rgba(0,0,0,0.3);
-      border-radius: 20px;
-      padding: 20px;
-      min-height: 300px;
-    }
-    .output h3 {
-      color: #feca57;
+    .game-area {
+      background: #000;
+      border-radius: 16px;
+      overflow: hidden;
       margin-bottom: 15px;
+      min-height: 420px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      justify-content: center;
     }
-    pre {
-      background: #1a1a2e;
-      padding: 15px;
-      border-radius: 12px;
-      overflow-x: auto;
-      font-size: 12px;
-      line-height: 1.5;
-      white-space: pre-wrap;
-      max-height: 400px;
-      overflow-y: auto;
+    
+    .game-area iframe {
+      width: 100%;
+      height: 420px;
+      border: none;
     }
-    .actions {
+    
+    .placeholder {
+      text-align: center;
+      color: #555;
+      padding: 50px;
+    }
+    .placeholder span { font-size: 60px; display: block; margin-bottom: 15px; }
+    
+    .controls {
       display: flex;
       gap: 10px;
-      margin-top: 15px;
     }
-    .action-btn {
+    .ctrl-btn {
       flex: 1;
       padding: 14px;
       border: none;
-      border-radius: 12px;
+      border-radius: 10px;
       font-size: 14px;
       font-weight: 600;
       cursor: pointer;
-      transition: transform 0.2s;
     }
-    .copy-btn {
-      background: #48dbfb;
-      color: #1a1a2e;
-    }
-    .play-btn {
-      background: #1dd1a1;
-      color: #1a1a2e;
-    }
-    .share-btn {
-      background: #a55eea;
-      color: white;
-    }
-    .action-btn:hover { transform: scale(1.02); }
+    .new-btn { background: #ff6b6b; color: white; }
+    .share-btn { background: #48dbfb; color: #1a1a2e; }
+    .copy-btn { background: #1dd1a1; color: #1a1a2e; }
     
-    .footer {
+    .tip {
+      margin-top: 15px;
+      padding: 12px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      font-size: 13px;
+      color: #777;
       text-align: center;
-      margin-top: 30px;
-      color: #555;
-      font-size: 12px;
     }
   </style>
 </head>
@@ -162,97 +125,63 @@
   <div class="app">
     <div class="header">
       <h1>🎮 AI Game Maker</h1>
-      <p>Type an idea, get a playable game!</p>
-    </div>
-    
-    <div class="category-section">
-      <div class="category-title">🎮 Game Types</div>
-      <div class="categories">
-        <button class="cat-btn" onclick="fillPrompt('make a jumping game with platforms and powerups')">🏃 Platformer</button>
-        <button class="cat-btn" onclick="fillPrompt('make a space shooter with enemies and upgrades')">🚀 Space Shooter</button>
-        <button class="cat-btn" onclick="fillPrompt('make a snake game that grows when eating')">🐍 Snake</button>
-        <button class="cat-btn" onclick="fillPrompt('make a racing game with boost pads')">🏎️ Racing</button>
-        <button class="cat-btn" onclick="fillPrompt('make a puzzle game matching colors')">🧩 Puzzle</button>
-        <button class="cat-btn" onclick="fillPrompt('make an endless runner with obstacles')">🏃 Runner</button>
-        <button class="cat-btn" onclick="fillPrompt('make a tennis game with physics')">🎾 Sports</button>
-        <button class="cat-btn" onclick="fillPrompt('make a flappy bird clone with characters')">🐦 Flappy</button>
-      </div>
-    </div>
-    
-    <div class="category-section">
-      <div class="category-title">⚡ Difficulty</div>
-      <div class="categories">
-        <button class="cat-btn" onclick="setDifficulty('easy')">😊 Easy</button>
-        <button class="cat-btn" onclick="setDifficulty('medium')">🤔 Medium</button>
-        <button class="cat-btn" onclick="setDifficulty('hard')">😈 Hard</button>
-        <button class="cat-btn" onclick="setDifficulty('insane')">💀 Insane</button>
-      </div>
-    </div>
-    
-    <div class="category-section">
-      <div class="category-title">✨ Special</div>
-      <div class="categories">
-        <button class="cat-btn" onclick="fillPrompt('make a game with 2 player local multiplayer')">👥 2 Player</button>
-        <button class="cat-btn" onclick="fillPrompt('make a game with cool particle effects and neon graphics')">💫 Neon</button>
-        <button class="cat-btn" onclick="fillPrompt('make a game with boss battles')">👹 Boss Fight</button>
-        <button class="cat-btn" onclick="fillPrompt('make a game with powerups and upgrades')">⭐ RPG Style</button>
-      </div>
+      <p>Type a game idea, play instantly!</p>
     </div>
     
     <div class="input-area">
-      <input type="text" id="prompt" placeholder="Describe your game idea..." />
-      <button class="make-btn" onclick="makeGame()" id="makeBtn">✨ Make My Game!</button>
+      <input type="text" id="prompt" placeholder="Describe your game..." />
+      <button class="make-btn" onclick="makeGame()" id="makeBtn">✨ Create & Play</button>
     </div>
     
-    <div class="output">
-      <h3>📦 Your Game Code</h3>
-      <pre id="code">// Your game code will appear here!
-// Click "Make My Game" to generate...</pre>
-      <div class="actions">
-        <button class="action-btn copy-btn" onclick="copyCode()">📋 Copy</button>
-        <button class="action-btn play-btn" onclick="goToEditor()">▶ Play</button>
-        <button class="action-btn share-btn" onclick="shareGame()" style="background:#a55eea;color:white;">🔗 Share</button>
+    <div class="categories">
+      <button class="cat-btn" onclick="fill('make a space shooter game')">🚀 Space</button>
+      <button class="cat-btn" onclick="fill('make a jumping platformer')">🏃 Platformer</button>
+      <button class="cat-btn" onclick="fill('make a snake game')">🐍 Snake</button>
+      <button class="cat-btn" onclick="fill('make a racing game')">🏎️ Racing</button>
+      <button class="cat-btn" onclick="fill('make flappy bird')">🐦 Flappy</button>
+      <button class="cat-btn" onclick="fill('make a boss battle game')">👹 Boss</button>
+    </div>
+    
+    <div class="game-area" id="gameArea">
+      <div class="placeholder">
+        <span>🎮</span>
+        Your game will appear here!<br/>
+        Click a category or type your idea above.
       </div>
-      <div id="shareLink" style="display:none;margin-top:15px;padding:12px;background:#222;border-radius:10px;font-size:13px;">
-        <span style="color:#48dbfb;">Share this link:</span>
-        <input type="text" id="shareInput" readonly style="width:100%;margin-top:8px;padding:10px;background:#333;border:none;border-radius:8px;color:#aaa;font-size:12px;" />
     </div>
     
-    <div class="footer">
-      Made by Henry 🚀 | Powered by AI
+    <div class="controls" id="controls" style="display:none;">
+      <button class="ctrl-btn new-btn" onclick="newGame()">🔄 New Game</button>
+      <button class="ctrl-btn copy-btn" onclick="copyCode()">📋 Copy Code</button>
+      <button class="ctrl-btn share-btn" onclick="shareGame()">🔗 Share</button>
+    </div>
+    
+    <div class="tip">
+      💡 Tip: Games run in p5.js editor. Use arrow keys, mouse, or spacebar!
     </div>
   </div>
 
   <script>
-    let lastCode = '';
+    let currentCode = '';
+    let gameId = Date.now();
     
-    function fillPrompt(text) {
+    function fill(text) {
       document.getElementById('prompt').value = text;
     }
     
-    function setDifficulty(level) {
-      const difficulties = {
-        easy: 'make an easy fun game with simple controls',
-        medium: 'make a moderate challenge game',
-        hard: 'make a challenging game with fast enemies',
-        insane: 'make an extremely hard game for experts only'
-      };
-      document.getElementById('prompt').value = difficulties[level];
-    }
-
     async function makeGame() {
       const prompt = document.getElementById('prompt').value;
       const btn = document.getElementById('makeBtn');
-      const codeEl = document.getElementById('code');
+      const area = document.getElementById('gameArea');
       
       if (!prompt.trim()) {
-        alert('Please type a game idea first!');
+        alert('Type a game idea first!');
         return;
       }
       
-      btn.textContent = '🤔 AI is creating your game...';
+      btn.textContent = '🤔 Creating...';
       btn.disabled = true;
-      codeEl.textContent = 'Generating...';
+      area.innerHTML = '<div class="placeholder"><span>⚡</span>Generating your game...</div>';
       
       try {
         const response = await fetch('https://ezinotes.vercel.app/api/makergame', {
@@ -264,68 +193,76 @@
         const data = await response.json();
         
         if (data.gameCode) {
-          // Clean up the code
           let code = data.gameCode;
-          // Remove markdown code blocks if present
           code = code.replace(/```javascript\n/g, '');
           code = code.replace(/```\n/g, '');
           code = code.replace(/```js\n/g, '');
           code = code.replace(/```/g, '');
           
-          lastCode = code;
-          codeEl.textContent = code;
+          // Add createCanvas if missing
+          if (!code.includes('createCanvas')) {
+            code = code.replace('function setup()', 'function setup() { createCanvas(500, 400);');
+          }
+          
+          currentCode = code;
+          
+          // Create p5.js embed
+          const embedUrl = createP5Embed(code);
+          area.innerHTML = `<iframe src="${embedUrl}" allow="clipboard-write"></iframe>`;
+          document.getElementById('controls').style.display = 'flex';
+          
         } else {
-          codeEl.textContent = 'Error: ' + (data.error || 'Something went wrong');
+          area.innerHTML = '<div class="placeholder"><span>❌</span>Error: ' + (data.error || 'Try again') + '</div>';
         }
       } catch(e) {
-        codeEl.textContent = 'Error: ' + e.message;
+        area.innerHTML = '<div class="placeholder"><span>❌</span>Error: ' + e.message + '</div>';
       }
       
-      btn.textContent = '✨ Make My Game!';
+      btn.textContent = '✨ Create & Play';
       btn.disabled = false;
     }
-
-    function copyCode() {
-      navigator.clipboard.writeText(lastCode);
-      alert('Code copied! Paste it into p5.js editor to play.');
+    
+    function createP5Embed(code) {
+      // Create a shareable p5 editor link
+      const encoded = encodeURIComponent(code);
+      return `https://editor.p5js.org/new/sketch?code=${encoded.substring(0, 5000)}`;
     }
     
-    function goToEditor() {
-      if (lastCode) {
-        navigator.clipboard.writeText(lastCode);
+    function newGame() {
+      document.getElementById('gameArea').innerHTML = '<div class="placeholder"><span>🎮</span>Your game will appear here!</div>';
+      document.getElementById('controls').style.display = 'none';
+      document.getElementById('prompt').value = '';
+      currentCode = '';
+    }
+    
+    function copyCode() {
+      if (currentCode) {
+        navigator.clipboard.writeText(currentCode);
         window.open('https://editor.p5js.org', '_blank');
-        alert('Code copied! Paste it into the p5.js editor.');
+        setTimeout(() => alert('Code copied! Paste it into p5.js editor to play.'), 100);
       }
     }
     
     function shareGame() {
-      if (!lastCode) {
-        alert('Make a game first!');
-        return;
-      }
-      // Encode code to base64 for sharing
-      const encoded = btoa(unescape(encodeURIComponent(lastCode)));
-      const shareUrl = 'https://ezinotes.vercel.app/game.html?code=' + encoded;
-      
-      document.getElementById('shareLink').style.display = 'block';
-      document.getElementById('shareInput').value = shareUrl;
-      document.getElementById('shareInput').select();
-      navigator.clipboard.writeText(shareUrl);
-      alert('Share link copied to clipboard!');
+      if (!currentCode) return;
+      const encoded = btoa(unescape(encodeURIComponent(currentCode)));
+      const url = 'https://ezinotes.vercel.app/game.html?code=' + encoded;
+      navigator.clipboard.writeText(url);
+      alert('Share link copied!');
     }
     
-    // Check for shared code in URL
-    window.onload = function() {
+    // Check for shared code
+    window.onload = () => {
       const params = new URLSearchParams(window.location.search);
       const sharedCode = params.get('code');
       if (sharedCode) {
         try {
-          lastCode = decodeURIComponent(escape(atob(sharedCode)));
-          document.getElementById('code').textContent = lastCode;
-          document.getElementById('prompt').value = 'Shared game from friend!';
-        } catch(e) {
-          console.log('Could not load shared code');
-        }
+          currentCode = decodeURIComponent(escape(atob(sharedCode)));
+          document.getElementById('prompt').value = 'Shared game!';
+          const embedUrl = createP5Embed(currentCode);
+          document.getElementById('gameArea').innerHTML = `<iframe src="${embedUrl}" allow="clipboard-write"></iframe>`;
+          document.getElementById('controls').style.display = 'flex';
+        } catch(e) {}
       }
     };
   </script>
