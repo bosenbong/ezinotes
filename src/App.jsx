@@ -38,7 +38,7 @@ export default function App() {
         
         // Send to API
         const formData = new FormData()
-        formData.append('audio', new Blob(chunks), 'audio.webm'))
+        formData.append('audio', new Blob(chunks), 'audio.webm')
         
         try {
           const res = await fetch('/api/transcribe', {
