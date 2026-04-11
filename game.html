@@ -166,7 +166,7 @@
     </div>
     
     <div class="category-section">
-      <div class="category-title">Quick Ideas</div>
+      <div class="category-title">🎮 Game Types</div>
       <div class="categories">
         <button class="cat-btn" onclick="fillPrompt('make a jumping game with platforms and powerups')">🏃 Platformer</button>
         <button class="cat-btn" onclick="fillPrompt('make a space shooter with enemies and upgrades')">🚀 Space Shooter</button>
@@ -174,6 +174,28 @@
         <button class="cat-btn" onclick="fillPrompt('make a racing game with boost pads')">🏎️ Racing</button>
         <button class="cat-btn" onclick="fillPrompt('make a puzzle game matching colors')">🧩 Puzzle</button>
         <button class="cat-btn" onclick="fillPrompt('make an endless runner with obstacles')">🏃 Runner</button>
+        <button class="cat-btn" onclick="fillPrompt('make a tennis game with physics')">🎾 Sports</button>
+        <button class="cat-btn" onclick="fillPrompt('make a flappy bird clone with characters')">🐦 Flappy</button>
+      </div>
+    </div>
+    
+    <div class="category-section">
+      <div class="category-title">⚡ Difficulty</div>
+      <div class="categories">
+        <button class="cat-btn" onclick="setDifficulty('easy')">😊 Easy</button>
+        <button class="cat-btn" onclick="setDifficulty('medium')">🤔 Medium</button>
+        <button class="cat-btn" onclick="setDifficulty('hard')">😈 Hard</button>
+        <button class="cat-btn" onclick="setDifficulty('insane')">💀 Insane</button>
+      </div>
+    </div>
+    
+    <div class="category-section">
+      <div class="category-title">✨ Special</div>
+      <div class="categories">
+        <button class="cat-btn" onclick="fillPrompt('make a game with 2 player local multiplayer')">👥 2 Player</button>
+        <button class="cat-btn" onclick="fillPrompt('make a game with cool particle effects and neon graphics')">💫 Neon</button>
+        <button class="cat-btn" onclick="fillPrompt('make a game with boss battles')">👹 Boss Fight</button>
+        <button class="cat-btn" onclick="fillPrompt('make a game with powerups and upgrades')">⭐ RPG Style</button>
       </div>
     </div>
     
@@ -206,6 +228,16 @@
     
     function fillPrompt(text) {
       document.getElementById('prompt').value = text;
+    }
+    
+    function setDifficulty(level) {
+      const difficulties = {
+        easy: 'make an easy fun game with simple controls',
+        medium: 'make a moderate challenge game',
+        hard: 'make a challenging game with fast enemies',
+        insane: 'make an extremely hard game for experts only'
+      };
+      document.getElementById('prompt').value = difficulties[level];
     }
 
     async function makeGame() {
