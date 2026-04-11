@@ -1,24 +1,159 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta name="theme-color" content="#2563eb" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <title>EziNotes - Voice to NDIS Notes</title>
-    <style>
-      * { box-sizing: border-box; margin: 0; padding: 0; }
-      body { 
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        background: #f8fafc;
-        min-height: 100vh;
-        touch-action: manipulation;
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>EziNotes</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .app {
+      max-width: 400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+    }
+    .header {
+      background: #2563eb;
+      color: white;
+      padding: 24px;
+      text-align: center;
+    }
+    .header h1 { font-size: 24px; }
+    .content { padding: 24px; text-align: center; }
+    .record-btn {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: none;
+      background: #2563eb;
+      color: white;
+      font-size: 48px;
+      cursor: pointer;
+    }
+    .record-btn.recording { background: #ef4444; }
+    .status { margin-top: 12px; color: #666; }
+    .note-box {
+      background: #f3f4f6;
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 24px;
+      min-height: 100px;
+      white-space: pre-wrap;
+      font-size: 14px;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="header">
+      <h1>📝 EziNotes</h1>
+      <p>Voice to NDIS notes</p>
+    </div>
+    <div class="content">
+      <button id="recordBtn" class="record-btn">🎤</button>
+      <p id="status" class="status">Tap mic to start</p>
+      <div id="noteBox" class="note-box">Your note will appear here...</div>
+      <div id="toast" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#111;color:white;padding:12px 24px;border-radius:8px;">Test</div>
+    </div>
+  </div>
+  <script>
+    const recordBtn = document.getElementById('recordBtn');
+    const statusEl = document.getElementById('status');
+    const noteBox = document.getElementById('noteBox');
+    const toast = document.getElementById('toast');
+    let isRecording = false;
+    let recognition = null;
+    let timer = null;
+    let seconds = 0;
+    let fullTranscript = '';
+
+    function show(msg) {
+      toast.textContent = msg;
+      toast.style.display = 'block';
+      setTimeout(() => toast.style.display = 'none', 3000);
+    }
+
+    function fmtTime(s) {
+      return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
+    }
+
+    function fmtNote(text) {
+      if (!text) return '';
+      const now = new Date();
+      const date = now.toLocaleDateString('en-AU', {day:'numeric', month:'long', year:'numeric'});
+      return 'Client: [Name]\\nDate/Time: 11:00am – 2:00pm\\nService Type: Social & Domestic Support / Transport\\n\\nACTIVITIES UNDERTAKEN:\\n' + text + '\\n\\nWELLBEING/OUTCOME:\\n- Client remained happy, healthy, and engaged.\\n- All tasks completed.\\n\\nDEPARTURE:\\nLeft at 2:00pm on time.';
+    }
+
+    recordBtn.onclick = () => {
+      if (isRecording) {
+        if (recognition) recognition.stop();
+        isRecording = false;
+        recordBtn.textContent = '🎤';
+        recordBtn.classList.remove('recording');
+        clearInterval(timer);
+        statusEl.textContent = 'Done! Check your note';
+        show('Recording stopped');
+      } else {
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SR) {
+          statusEl.textContent = 'Speech not supported - try Chrome';
+          show('Not supported');
+          return;
+        }
+        recognition = new SR();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        
+        recognition.onstart = () => {
+          isRecording = true;
+          fullTranscript = '';
+          seconds = 0;
+          recordBtn.textContent = '⏹';
+          recordBtn.classList.add('recording');
+          statusEl.textContent = 'Recording... speak now';
+          show('Recording...');
+          timer = setInterval(() => {
+            seconds++;
+            statusEl.textContent = 'Recording: ' + fmtTime(seconds);
+          }, 1000);
+        };
+        
+        recognition.onresult = (e) => {
+          let final = '', interim = '';
+          for (let i = e.resultIndex; i < e.results.length; i++) {
+            const t = e.results[i][0].transcript;
+            if (e.results[i].isFinal) final += t + ' ';
+            else interim += t;
+          }
+          if (final) fullTranscript += final;
+          if (interim) statusEl.textContent = 'Listening: ' + interim.substring(0,30) + '...';
+        };
+        
+        recognition.onerror = (e) => {
+          statusEl.textContent = 'Error: ' + e.error;
+          show(e.error);
+        };
+        
+        recognition.onend = () => {
+          if (isRecording) try { recognition.start(); } catch(e) {}
+        };
+        
+        try {
+          recognition.start();
+        } catch(e) {
+          statusEl.textContent = 'Error: ' + e.message;
+        }
       }
-    </style>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+    };
+  </script>
+</body>
 </html>
