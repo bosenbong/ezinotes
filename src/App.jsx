@@ -47,11 +47,13 @@ export default function App() {
       let interim = ''
       
       for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript
+        const t = event.results[i][0].transcript.trim()
+        if (!t) continue
         if (event.results[i].isFinal) {
-          final += transcript + ' '
+          // Deduplicate - avoid repeated phrases
+          final += t + ' '
         } else {
-          interim += transcript
+          interim += t
         }
       }
       
@@ -71,8 +73,16 @@ export default function App() {
     }
     
     recognition.onend = () => {
+      // Only auto-restart if still supposed to be recording
       if (isRecording) {
-        try { recognition.start() } catch(e) {}
+        try { 
+          recognition.start() 
+        } catch(e) {
+          // Failed to restart - stop cleanly
+          setIsRecording(false)
+          clearInterval(timerRef.current)
+          setStatus('Recording ended')
+        }
       }
     }
     
