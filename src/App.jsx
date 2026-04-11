@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 
 export default function App() {
+  const timerRef = useRef(null)
   const [isRecording, setIsRecording] = useState(false)
   const [transcript, setTranscript] = useState('')
   const [status, setStatus] = useState('Tap the mic to start')
@@ -10,7 +11,6 @@ export default function App() {
   
   let mediaRecorder = null
   let chunks = []
-  let timer = null
 
   const show = (msg) => {
     setToastMsg(msg)
@@ -66,7 +66,7 @@ export default function App() {
       setStatus('Recording... speak now')
       show('Recording...')
       
-      timer = setInterval(() => {
+      timerRef.current = setInterval(() => {
         setRecordingTime(t => t + 1)
       }, 1000)
       
@@ -80,7 +80,7 @@ export default function App() {
     if (mediaRecorder) {
       mediaRecorder.stop()
       setIsRecording(false)
-      clearInterval(timer)
+      clearInterval(timerRef.current)
       setRecordingTime(0)
     }
   }
