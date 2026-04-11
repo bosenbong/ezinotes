@@ -2,281 +2,378 @@
 <html>
 <head>
   <title>FEVER 3D</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.sound.min.js"></script>
   <style>
-    body { margin: 0; background: #000; overflow: hidden; }
+    body { margin: 0; background: #111; overflow: hidden; font-family: 'Courier New', monospace; }
+    canvas { display: block; }
+    
+    #ui {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      color: #ff4444;
+      font-size: 18px;
+      z-index: 100;
+    }
+    
+    #fever-bar {
+      width: 200px;
+      height: 20px;
+      background: #333;
+      border: 2px solid #ff4444;
+      margin-top: 5px;
+    }
+    
+    #fever-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ff4444, #ff0000);
+      width: 0%;
+    }
+    
+    #message {
+      position: fixed;
+      top: 30%;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #ffff00;
+      font-size: 32px;
+      text-align: center;
+      text-shadow: 2px 2px 0 #ff0000;
+      display: none;
+      z-index: 100;
+    }
+    
+    #start-screen {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+    
+    #start-screen h1 {
+      color: #ff0000;
+      font-size: 72px;
+      text-shadow: 4px 4px 0 #880000;
+      animation: shake 0.1s infinite;
+    }
+    
+    #start-screen p {
+      color: #888;
+      font-size: 20px;
+    }
+    
+    @keyframes shake {
+      0% { transform: translate(1px, 1px) rotate(0deg); }
+      25% { transform: translate(-1px, -2px) rotate(-1deg); }
+      50% { transform: translate(-3px, 0px) rotate(1deg); }
+      75% { transform: translate(3px, 2px) rotate(0deg); }
+      100% { transform: translate(1px, -1px) rotate(-1deg); }
+    }
+    
+    #crosshair {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 20px; height: 20px;
+      z-index: 50;
+    }
+    #crosshair::before, #crosshair::after {
+      content: '';
+      position: absolute;
+      background: #fff;
+    }
+    #crosshair::before { width: 2px; height: 20px; left: 9px; }
+    #crosshair::after { width: 20px; height: 2px; top: 9px; }
   </style>
 </head>
 <body>
-<script>
-// 🎮 FEVER 3D - First Person
-let gameState = "START";
-let camX = 0, camY = 100, camZ = 0;
-let camRotY = 0;
-let moveSpeed = 3;
-let lookSpeed = 0.03;
-let playerY = 0;
-let velocityY = 0;
-let gravity = 0.5;
-let jumpPower = 15;
-let grounded = false;
-let level = 1;
-let deaths = 0;
-let fever = 0;
-let messages = [];
-let inTrap = false;
-
-const levelData = [];
-const rages = ["I'M GETTING FEVER!", "STUPID PLAYER!", "YOU CAN'T BEAT ME!", "JUST GIVE UP!", "WHY WON'T YOU DIE?!", "FEEEEEEVER!!"];
-
-function setup() {
-  createCanvas(windowWidth, windowHeight, WEBGL);
-  generateLevel();
-}
-
-function generateLevel() {
-  levelData.length = 0;
+  <div id="ui">
+    <div>FEVER: <span id="fever-text">0%</span></div>
+    <div id="fever-bar"><div id="fever-fill"></div></div>
+    <div style="margin-top: 10px;">Level: <span id="level">1</span></div>
+    <div>Deaths: <span id="deaths">0</span></div>
+  </div>
   
-  // Floor
-  for (let x = -500; x < 500; x += 50) {
-    for (let z = -500; z < 500; z += 50) {
-      if (random() < 0.15) {
-        levelData.push({x, y: 0, z, w: 50, h: 50, type: "hole"}); // Hole!
-      } else if (random() < 0.1) {
-        levelData.push({x, y: 0, z, w: 50, h: 50, type: "lava"}); // LAVA!
-      } else if (random() < 0.05) {
-        levelData.push({x, y: 0, z, w: 50, h: 50, type: "fake"}); // Fake!
-      } else {
-        levelData.push({x, y: 0, z, w: 50, h: 50, type: "floor"});
+  <div id="crosshair"></div>
+  <div id="message"></div>
+  
+  <div id="start-screen">
+    <h1>FEVER 3D</h1>
+    <p>A game that hates you</p>
+    <p style="margin-top: 30px;">WASD to move | Mouse to look | Space to jump</p>
+    <p style="color: #ff4444; margin-top: 20px;">Click to start suffering</p>
+  </div>
+
+  <canvas id="game"></canvas>
+
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    
+    let gameStarted = false;
+    let pitch = 0;
+    let yaw = 0;
+    let posX = 0, posY = 0, posZ = 0;
+    let velY = 0;
+    let grounded = false;
+    let fever = 0;
+    let deaths = 0;
+    let level = 1;
+    
+    let platforms = [];
+    let traps = [];
+    let lava = [];
+    let goal = null;
+    
+    const keys = {};
+    const rages = ["I'M GETTING FEVER!", "STUPID PLAYER!", "YOU CAN'T BEAT ME!", "JUST GIVE UP!", "WHY WON'T YOU DIE?!", "FEEEEEEVER!!"];
+    
+    document.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+    document.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+    
+    document.addEventListener('click', () => {
+      if (!gameStarted) {
+        gameStarted = true;
+        document.getElementById('start-screen').style.display = 'none';
+        canvas.requestPointerLock();
+        initLevel();
       }
-    }
-  }
-  
-  // Platforms
-  for (let i = 0; i < level + 5; i++) {
-    levelData.push({
-      x: random(-400, 400),
-      y: -50 - i * 80,
-      z: -400 + i * 150,
-      w: 80,
-      h: 80,
-      type: random() < 0.3 ? "trap" : "platform"
     });
-  }
-  
-  // Goal
-  levelData.push({x: 0, y: -200 - level * 80, z: -450, w: 60, h: 60, type: "goal"});
-}
-
-function draw() {
-  background(0);
-  
-  if (gameState === "START") {
-    drawStartScreen();
-  } else if (gameState === "PLAY") {
-    playGame();
-  }
-}
-
-function drawStartScreen() {
-  textAlign(CENTER);
-  textSize(60);
-  fill(255, 50, 50);
-  push();
-  rotateY(frameCount * 0.01);
-  text("FEVER 3D", 0, 0);
-  pop();
-  
-  textSize(20);
-  fill(200);
-  text("First Person Rage Game", 0, 50);
-  
-  textSize(16);
-  fill(150);
-  text("WASD to move | Mouse to look | Space to jump", 0, 100);
-  text("Click to start suffering", 0, 150);
-}
-
-function playGame() {
-  // Lighting
-  ambientLight(50);
-  directionalLight(255, 200, 200, 0, -1, 0);
-  
-  // Camera setup
-  rotateX(constrain(-mouseY * 0.001, -PI/3, PI/3));
-  rotateY(-mouseX * 0.003 + camRotY);
-  
-  // Fever effect
-  if (fever > 20) {
-    let flash = random() < fever * 0.01;
-    if (flash) background(255, 50, 50);
-  }
-  
-  // Draw level
-  for (let obj of levelData) {
-    push();
-    translate(obj.x, obj.y, obj.z);
     
-    if (obj.type === "floor" || obj.type === "platform") {
-      fill(100, 150, 255);
-    } else if (obj.type === "hole") {
-      fill(0);
-      continue;
-    } else if (obj.type === "lava") {
-      fill(255, 100, 0);
-    } else if (obj.type === "fake") {
-      fill(100, 200, 255); // Looks safe!
-    } else if (obj.type === "trap") {
-      fill(255, 50, 100);
-    } else if (obj.type === "goal") {
-      fill(255, 215, 0);
-    }
-    
-    box(obj.w, 10, obj.h);
-    pop();
-  }
-  
-  // Movement
-  if (keyIsDown(87)) { // W
-    camZ -= cos(camRotY) * moveSpeed;
-    camX -= sin(camRotY) * moveSpeed;
-  }
-  if (keyIsDown(83)) { // S
-    camZ += cos(camRotY) * moveSpeed;
-    camX += sin(camRotY) * moveSpeed;
-  }
-  if (keyIsDown(65)) { // A
-    camX -= cos(camRotY) * moveSpeed;
-    camZ += sin(camRotY) * moveSpeed;
-  }
-  if (keyIsDown(68)) { // D
-    camX += cos(camRotY) * moveSpeed;
-    camZ -= sin(camRotY) * moveSpeed;
-  }
-  
-  // Jump
-  if (keyIsDown(32) && grounded) {
-    velocityY = -jumpPower;
-    grounded = false;
-  }
-  
-  // Gravity
-  velocityY += gravity;
-  playerY += velocityY;
-  
-  // Ground collision
-  grounded = false;
-  for (let obj of levelData) {
-    if (obj.type !== "floor" && obj.type !== "platform" && obj.type !== "goal") continue;
-    
-    if (camX > obj.x - obj.w/2 && camX < obj.x + obj.w/2 &&
-        camZ > obj.z - obj.h/2 && camZ < obj.z + obj.h/2 &&
-        playerY < obj.y - 5 && playerY > obj.y - 20) {
-      
-      if (obj.type === "floor" || obj.type === "platform") {
-        playerY = obj.y - 10;
-        velocityY = 0;
-        grounded = true;
+    document.addEventListener('mousemove', e => {
+      if (document.pointerLockElement === canvas) {
+        yaw -= e.movementX * 0.002;
+        pitch -= e.movementY * 0.002;
+        pitch = Math.max(-Math.PI/2 + 0.1, Math.min(Math.PI/2 - 0.1, pitch));
       }
+    });
+    
+    function initLevel() {
+      platforms = [];
+      traps = [];
+      lava = [];
+      
+      // Floor with holes
+      for (let x = -20; x <= 20; x++) {
+        for (let z = -20; z <= 20; z++) {
+          let r = Math.random();
+          if (r < 0.1) {
+            // Hole!
+          } else if (r < 0.2) {
+            lava.push({x: x * 100, z: z * 100});
+          } else if (r < 0.25) {
+            traps.push({x: x * 100, z: z * 100, move: Math.random() < 0.3});
+          } else {
+            platforms.push({x: x * 100, z: z * 100});
+          }
+        }
+      }
+      
+      // Floating platforms
+      for (let i = 0; i < level + 4; i++) {
+        let py = -80 - i * 100;
+        let pz = -200 - i * 180;
+        platforms.push({
+          x: Math.random() * 300 - 150,
+          z: pz,
+          y: py,
+          move: Math.random() < 0.3
+        });
+      }
+      
+      // Goal
+      goal = {x: 0, y: -300 - level * 100, z: -500};
     }
-  }
-  
-  translate(0, playerY, 0);
-  
-  // Fall death
-  if (playerY > 200) {
-    die("fell into the void");
-  }
-  
-  // UI
-  camRotY = 0;
-  
-  // Fever bar
-  push();
-  resetMatrix();
-  translate(-width/2 + 20, -height/2 + 30);
-  fill(50);
-  rect(0, 0, 200, 20);
-  fill(255, 100, 100);
-  rect(0, 0, fever * 4, 20);
-  fill(255);
-  textSize(12);
-  text("FEVER: " + Math.floor(fever * 2) + "%", 5, 14);
-  pop();
-  
-  // Messages
-  for (let i = messages.length - 1; i >= 0; i--) {
-    messages[i].timer--;
-    if (messages[i].timer <= 0) {
-      messages.splice(i, 1);
-    } else {
-      push();
-      resetMatrix();
-      textAlign(CENTER);
-      textSize(24);
-      fill(255, 255, 0);
-      text(messages[i].text, width/2, height/3);
-      pop();
+    
+    function showMessage(text) {
+      const msg = document.getElementById('message');
+      msg.textContent = text;
+      msg.style.display = 'block';
+      setTimeout(() => msg.style.display = 'none', 2000);
     }
-  }
-  
-  // Level
-  push();
-  resetMatrix();
-  textSize(16);
-  fill(200);
-  text("Level " + level, width - 100, 30);
-  text("Deaths: " + deaths, width - 100, 50);
-  pop();
-}
-
-function die(reason) {
-  deaths++;
-  fever = min(fever + 3, 50);
-  showMessage(random(rages));
-  resetPosition();
-}
-
-function winLevel() {
-  level++;
-  showMessage("LUCKY!");
-  generateLevel();
-  resetPosition();
-}
-
-function resetPosition() {
-  camX = 0;
-  camZ = 0;
-  playerY = 0;
-  velocityY = 0;
-}
-
-function showMessage(msg) {
-  messages.push({text: msg, timer: 120});
-}
-
-function keyPressed() {
-  if (gameState === "START") {
-    gameState = "PLAY";
-    return;
-  }
-  
-  // Look around
-  if (key === 'a' || key === 'd') {
-    camRotY = (key === 'a') ? lookSpeed : -lookSpeed;
-  }
-}
-
-function mousePressed() {
-  if (gameState === "START") {
-    gameState = "PLAY";
-  }
-}
-
-function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
-}
-</script>
+    
+    function update() {
+      if (!gameStarted) return;
+      
+      const speed = 5;
+      let forward = 0, strafe = 0;
+      
+      if (keys['w']) forward += speed;
+      if (keys['s']) forward -= speed;
+      if (keys['a']) strafe -= speed;
+      if (keys['d']) strafe += speed;
+      
+      // Move in direction we're facing
+      posX += Math.sin(yaw) * forward + Math.cos(yaw) * strafe;
+      posZ += Math.cos(yaw) * forward - Math.sin(yaw) * strafe;
+      
+      // Jump
+      if (keys[' '] && grounded) {
+        velY = -15;
+        grounded = false;
+      }
+      
+      // Gravity
+      velY += 0.8;
+      posY += velY;
+      
+      // Ground collision
+      grounded = false;
+      
+      // Check floor
+      if (posY >= 0) {
+        for (let l of lava) {
+          if (Math.abs(posX - l.x) < 50 && Math.abs(posZ - l.z) < 50) {
+            die("LAVA!");
+            return;
+          }
+        }
+        
+        for (let t of traps) {
+          if (Math.abs(posX - t.x) < 50 && Math.abs(posZ - t.z) < 50) {
+            die("TRAP!");
+            return;
+          }
+        }
+        
+        if (Math.random() < 0.1) {
+          // Random trap floor!
+        } else {
+          posY = 0;
+          velY = 0;
+          grounded = true;
+        }
+      }
+      
+      // Platform collision
+      for (let p of platforms) {
+        if (p.y !== undefined) { // Floating platform
+          if (Math.abs(posX - p.x) < 50 && Math.abs(posZ - p.z) < 50 &&
+              posY < p.y + 10 && posY > p.y - 20 && velY >= 0) {
+            posY = p.y;
+            velY = 0;
+            grounded = true;
+          }
+          
+          if (p.move) {
+            p.x += Math.sin(Date.now() * 0.003) * 2;
+          }
+        }
+      }
+      
+      // Goal
+      if (goal && Math.abs(posX - goal.x) < 40 && Math.abs(posZ - goal.z) < 40 && posY < goal.y + 50) {
+        level++;
+        showMessage("LEVEL " + level + "!");
+        posX = 0; posY = 0; posZ = 0;
+        initLevel();
+      }
+      
+      // Fall death
+      if (posY > 300) {
+        die("FELL OFF!");
+      }
+      
+      // Update UI
+      document.getElementById('fever-fill').style.width = fever + '%';
+      document.getElementById('fever-text').textContent = Math.floor(fever * 2) + '%';
+      document.getElementById('level').textContent = level;
+      document.getElementById('deaths').textContent = deaths;
+    }
+    
+    function die(reason) {
+      deaths++;
+      fever = Math.min(fever + 5, 50);
+      showMessage(rages[Math.floor(Math.random() * rages.length)]);
+      posX = 0; posY = 0; posZ = 0;
+      velY = 0;
+    }
+    
+    function render() {
+      // Clear with fever effect
+      ctx.fillStyle = fever > 20 && Math.random() < fever * 0.01 ? '#440000' : '#111';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      if (!gameStarted) return;
+      
+      ctx.save();
+      ctx.translate(canvas.width/2, canvas.height/2);
+      
+      // 3D projection
+      let cosY = Math.cos(yaw);
+      let sinY = Math.sin(yaw);
+      let cosP = Math.cos(pitch);
+      let sinP = Math.sin(pitch);
+      
+      function project(x, y, z) {
+        // Rotate
+        let x1 = x * cosY - z * sinY;
+        let z1 = x * sinY + z * cosY;
+        let y1 = y * cosP - z1 * sinP;
+        let z2 = y * sinP + z1 * cosP;
+        
+        // Perspective
+        let scale = 400 / (z2 + 500);
+        return {
+          x: x1 * scale + canvas.width/2,
+          y: y1 * scale + canvas.height/2,
+          scale: scale
+        };
+      }
+      
+      // Draw platforms
+      ctx.fillStyle = '#4488ff';
+      for (let p of platforms) {
+        let py = p.y !== undefined ? p.y : 0;
+        let proj = project(p.x - posX, py - posY, p.z - posZ);
+        if (proj.scale > 0) {
+          ctx.fillRect(proj.x - 40 * proj.scale, proj.y - 10 * proj.scale, 80 * proj.scale, 20 * proj.scale);
+        }
+      }
+      
+      // Draw lava
+      ctx.fillStyle = '#ff4400';
+      for (let l of lava) {
+        let proj = project(l.x - posX, 0 - posY, l.z - posZ);
+        if (proj.scale > 0) {
+          ctx.fillRect(proj.x - 40 * proj.scale, proj.y - 5 * proj.scale, 80 * proj.scale, 15 * proj.scale);
+        }
+      }
+      
+      // Draw traps
+      ctx.fillStyle = '#ff0066';
+      for (let t of traps) {
+        let proj = project(t.x - posX, 0 - posY, t.z - posZ);
+        if (proj.scale > 0) {
+          ctx.fillRect(proj.x - 30 * proj.scale, proj.y - 8 * proj.scale, 60 * proj.scale, 15 * proj.scale);
+        }
+      }
+      
+      // Draw goal
+      if (goal) {
+        ctx.fillStyle = '#ffdd00';
+        let proj = project(goal.x - posX, goal.y - posY, goal.z - posZ);
+        if (proj.scale > 0) {
+          ctx.fillRect(proj.x - 30 * proj.scale, proj.y - 30 * proj.scale, 60 * proj.scale, 60 * proj.scale);
+        }
+      }
+      
+      ctx.restore();
+    }
+    
+    function loop() {
+      update();
+      render();
+      requestAnimationFrame(loop);
+    }
+    
+    loop();
+  </script>
 </body>
 </html>
