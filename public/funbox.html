@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🎉 FunBox - 5 Games & More!</title>
+  <title>🎮 FunBox - 10 Games!</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap');
     
@@ -11,70 +11,69 @@
     
     body {
       font-family: 'Fredoka', sans-serif;
-      background: linear-gradient(135deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #54a0ff);
-      background-size: 400% 400%;
-      animation: gradientBG 15s ease infinite;
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
       min-height: 100vh;
-      padding: 20px;
-    }
-    
-    @keyframes gradientBG {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+      padding: 15px;
     }
     
     .app {
       max-width: 500px;
       margin: 0 auto;
-      background: white;
-      border-radius: 30px;
+      background: #0f0f23;
+      border-radius: 25px;
       overflow: hidden;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      box-shadow: 0 0 50px rgba(255, 107, 107, 0.3);
     }
     
     .header {
-      background: linear-gradient(90deg, #ff6b6b, #feca57);
-      color: white;
+      background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb);
       padding: 25px;
       text-align: center;
     }
     
-    .header h1 { font-size: 32px; }
-    .header p { font-size: 16px; opacity: 0.9; }
+    .header h1 { 
+      font-size: 36px; 
+      color: white;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
     
     .menu {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 15px;
-      padding: 20px;
+      gap: 12px;
+      padding: 15px;
     }
     
     .menu-btn {
-      padding: 25px 15px;
+      padding: 20px 10px;
       border: none;
-      border-radius: 20px;
-      font-size: 40px;
+      border-radius: 18px;
+      font-size: 35px;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.15s;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
     
-    .menu-btn:hover { transform: scale(1.05); }
-    .menu-btn span { font-size: 14px; font-weight: 600; }
+    .menu-btn:hover { transform: scale(1.08) rotate(2deg); }
+    .menu-btn:active { transform: scale(0.95); }
+    .menu-btn span { font-size: 12px; font-weight: 600; color: white; }
     
-    .btn-1 { background: #ff6b6b; color: white; }
-    .btn-2 { background: #48dbfb; color: white; }
-    .btn-3 { background: #ff9ff3; color: white; }
-    .btn-4 { background: #feca57; color: #333; }
-    .btn-5 { background: #54a0ff; color: white; }
-    .btn-6 { background: #26de81; color: white; grid-column: span 2; }
+    .btn-1 { background: linear-gradient(135deg, #ff6b6b, #ee5a5a); }
+    .btn-2 { background: linear-gradient(135deg, #48dbfb, #0abde3); }
+    .btn-3 { background: linear-gradient(135deg, #feca57, #f39c12); }
+    .btn-4 { background: linear-gradient(135deg, #26de81, #20bf6b); }
+    .btn-5 { background: linear-gradient(135deg, #a55eea, #8854d0); }
+    .btn-6 { background: linear-gradient(135deg, #ff9ff3, #f368e0); }
+    .btn-7 { background: linear-gradient(135deg, #54a0ff, #2e86de); }
+    .btn-8 { background: linear-gradient(135deg, #fd9644, #fc5c65); }
+    .btn-9 { background: linear-gradient(135deg, #2d3436, #636e72); }
+    .btn-10 { background: linear-gradient(135deg, #00d2ff, #3a7bd5); grid-column: span 2; }
     
     .game-area {
-      padding: 20px;
+      padding: 15px;
       display: none;
       text-align: center;
     }
@@ -84,222 +83,202 @@
     .back-btn {
       background: #636e72;
       color: white;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 20px;
-      font-size: 16px;
-      cursor: pointer;
-      margin-bottom: 20px;
-    }
-    
-    h2 { margin-bottom: 20px; color: #333; }
-    
-    /* Game 1: Tap Fast */
-    #tapBtn {
-      width: 150px;
-      height: 150px;
-      border-radius: 50%;
-      background: #ff6b6b;
-      border: none;
-      font-size: 24px;
-      color: white;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    
-    #tapBtn:active { transform: scale(0.95); }
-    #tapScore { font-size: 48px; font-weight: bold; color: #ff6b6b; margin: 20px 0; }
-    
-    /* Game 2: Random Picker */
-    #wheel {
-      width: 250px;
-      height: 250px;
-      border-radius: 50%;
-      background: conic-gradient(
-        #ff6b6b 0deg 60deg,
-        #48dbfb 60deg 120deg,
-        #ff9ff3 120deg 180deg,
-        #feca57 180deg 240deg,
-        #54a0ff 240deg 300deg,
-        #26de81 300deg 360deg
-      );
-      margin: 20px auto;
-      position: relative;
-      transition: transform 3s ease-out;
-    }
-    
-    #wheel::after {
-      content: '👉';
-      position: absolute;
-      top: -20px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 40px;
-    }
-    
-    #spinResult { font-size: 24px; font-weight: bold; margin: 20px 0; min-height: 40px; }
-    
-    /* Game 3: Would You Rather */
-    #wyrcard {
-      background: linear-gradient(135deg, #ff9ff3, #feca57);
-      padding: 30px;
-      border-radius: 20px;
-      margin: 20px 0;
-    }
-    #wyroption1, #wyroption2 {
-      background: white;
-      padding: 20px;
-      margin: 10px 0;
-      border-radius: 15px;
-      cursor: pointer;
-      font-size: 18px;
-      font-weight: 600;
-    }
-    
-    /* Game 4: Compliments */
-    #compliment {
-      font-size: 28px;
-      padding: 30px;
-      background: linear-gradient(135deg, #54a0ff, #48dbfb);
-      color: white;
-      border-radius: 20px;
-      margin: 20px 0;
-    }
-    
-    /* Game 5: Fortune */
-    #fortuneBox {
-      font-size: 20px;
-      padding: 30px;
-      background: #2d3436;
-      color: #feca57;
-      border-radius: 20px;
-      margin: 20px 0;
-      min-height: 100px;
-    }
-    
-    input, textarea {
-      width: 100%;
-      padding: 15px;
-      border: 2px solid #ddd;
-      border-radius: 15px;
-      font-size: 16px;
-      margin: 10px 0;
-    }
-    
-    .action-btn {
-      background: #ff6b6b;
-      color: white;
-      padding: 15px 30px;
+      padding: 12px 25px;
       border: none;
       border-radius: 25px;
-      font-size: 18px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-bottom: 15px;
+    }
+    
+    h2 { margin-bottom: 15px; color: white; font-size: 24px; }
+    
+    .game-btn {
+      background: linear-gradient(135deg, #ff6b6b, #feca57);
+      color: white;
+      padding: 18px 35px;
+      border: none;
+      border-radius: 30px;
+      font-size: 20px;
       font-weight: bold;
       cursor: pointer;
-      margin: 10px 5px;
+      margin: 10px;
     }
+    
+    #gameCanvas {
+      background: #1a1a2e;
+      border-radius: 15px;
+      margin: 10px auto;
+      display: block;
+    }
+    
+    .score { font-size: 42px; font-weight: bold; color: #feca57; margin: 10px 0; }
+    .timer { font-size: 28px; color: #ff6b6b; margin: 10px 0; }
+    
+    #target {
+      width: 50px;
+      height: 50px;
+      background: #ff6b6b;
+      border-radius: 50%;
+      position: absolute;
+      cursor: crosshair;
+    }
+    
+    .rainBtn, .fireBtn {
+      padding: 30px;
+      border-radius: 20px;
+      border: none;
+      font-size: 60px;
+      cursor: pointer;
+      margin: 10px;
+    }
+    
+    .rainBtn { background: linear-gradient(135deg, #48dbfb, #0abde3); }
+    .fireBtn { background: linear-gradient(135deg, #fd9644, #f368e0); }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    
+    .pulse { animation: pulse 0.5s infinite; }
   </style>
 </head>
 <body>
   <div class="app">
     <div class="header">
-      <h1>🎉 FunBox</h1>
-      <p>5 Games & More!</p>
+      <h1>🎮 FunBox</h1>
     </div>
     
     <div class="menu" id="menu">
-      <button class="menu-btn btn-1" onclick="showGame('tapgame')">
-        👆<span>Tap Fast</span>
-      </button>
-      <button class="menu-btn btn-2" onclick="showGame('picker')">
-        🎲<span>Random Picker</span>
-      </button>
-      <button class="menu-btn btn-3" onclick="showGame('wyr')">
-        🤔<span>Would You Rather</span>
-      </button>
-      <button class="menu-btn btn-4" onclick="showGame('compliment')">
-        💖<span>Compliments</span>
-      </button>
-      <button class="menu-btn btn-5" onclick="showGame('fortune')">
-        🔮<span>Fortune Teller</span>
-      </button>
-      <button class="menu-btn btn-6" onclick="showGame('meme')">
-        🎭<span>Meme Maker</span>
-      </button>
+      <button class="menu-btn btn-1" onclick="showGame('tap')">👆<span>Tap Rush</span></button>
+      <button class="menu-btn btn-2" onclick="showGame('reaction')">⚡<span>Reaction</span></button>
+      <button class="menu-btn btn-3" onclick="showGame('aim')">🎯<span>Aim Trainer</span></button>
+      <button class="menu-btn btn-4" onclick="showGame('memory')">🧠<span>Memory</span></button>
+      <button class="menu-btn btn-5" onclick="showGame('bubble')">🫧<span>Bubble Pop</span></button>
+      <button class="menu-btn btn-6" onclick="showGame('simon')">🔴<span>Simon Says</span></button>
+      <button class="menu-btn btn-7" onclick="showGame('math')">🔢<span>Quick Math</span></button>
+      <button class="menu-btn btn-8" onclick="showGame('color')">🌈<span>Color Click</span></button>
+      <button class="menu-btn btn-9" onclick="showGame('asmr')">🌧️<span>ASMR</span></button>
+      <button class="menu-btn btn-10" onclick="showGame('balance')">🧊<span>Keep Balance</span></button>
     </div>
     
-    <!-- Tap Fast Game -->
-    <div class="game-area" id="tapgame">
+    <!-- Tap Rush -->
+    <div class="game-area" id="tap">
       <button class="back-btn" onclick="showMenu()">⬅ Back</button>
-      <h2>👆 Tap Fast!</h2>
-      <p>Tap as many times as you can in 5 seconds!</p>
-      <button id="tapBtn" onclick="tap()">TAP!</button>
-      <div id="tapScore">0</div>
-      <button class="action-btn" onclick="startTapGame()">▶ Start</button>
+      <h2>👆 Tap Rush!</h2>
+      <p style="color:#888;">Tap as much as you can in 3 seconds!</p>
+      <div class="score" id="tapScore">0</div>
+      <button class="game-btn" onclick="startTap()">▶ START</button>
     </div>
     
-    <!-- Random Picker -->
-    <div class="game-area" id="picker">
+    <!-- Reaction -->
+    <div class="game-area" id="reaction">
       <button class="back-btn" onclick="showMenu()">⬅ Back</button>
-      <h2>🎲 Random Picker</h2>
-      <input type="text" id="wheelOptions" placeholder="Enter options (comma separated)">
-      <p style="font-size:12px;color:#666;margin-bottom:10px;">Example: Pizza, Burgers, Sushi</p>
-      <button class="action-btn" onclick="spin()">🎰 Spin!</button>
-      <div id="wheel"></div>
-      <div id="spinResult"></div>
+      <h2>⚡ Reaction Test!</h2>
+      <p style="color:#888;">Wait for green, then tap!</p>
+      <div class="score" id="reactionResult" style="height:60px;display:flex;align-items:center;justify-content:center;">-</div>
+      <button class="game-btn" id="reactionBtn" onclick="startReaction()">▶ START</button>
     </div>
     
-    <!-- Would You Rather -->
-    <div class="game-area" id="wyr">
+    <!-- Aim Trainer -->
+    <div class="game-area" id="aim">
       <button class="back-btn" onclick="showMenu()">⬅ Back</button>
-      <h2>🤔 Would You Rather?</h2>
-      <div id="wyrcard">
-        <div id="wyroption1" onclick="nextWYR()">Loading...</div>
-        <p style="margin:10px 0;">OR</p>
-        <div id="wyroption2" onclick="nextWYR()">Loading...</div>
+      <h2>🎯 Aim Trainer!</h2>
+      <p style="color:#888;">Click all the targets! You have 10 seconds.</p>
+      <div class="score" id="aimScore">0</div>
+      <div id="aimArea" style="position:relative;width:100%;height:300px;background:#1a1a2e;border-radius:15px;margin:10px 0;">
+        <div id="aimTarget" style="position:absolute;width:40px;height:40px;background:#ff6b6b;border-radius:50%;cursor:crosshair;" onclick="hitTarget()"></div>
       </div>
-      <button class="action-btn" onclick="nextWYR()">🔄 New Question</button>
+      <button class="game-btn" onclick="startAim()">▶ START</button>
     </div>
     
-    <!-- Compliments -->
-    <div class="game-area" id="compliment">
+    <!-- Memory Match -->
+    <div class="game-area" id="memory">
       <button class="back-btn" onclick="showMenu()">⬅ Back</button>
-      <h2>💖 Daily Compliment</h2>
-      <div id="compliment">Tap button for a compliment!</div>
-      <button class="action-btn" onclick="newCompliment()">✨ New Compliment</button>
+      <h2>🧠 Memory Match!</h2>
+      <div id="memoryGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:15px 0;"></div>
+      <button class="game-btn" onclick="initMemory()">🔄 NEW GAME</button>
     </div>
     
-    <!-- Fortune Teller -->
-    <div class="game-area" id="fortune">
+    <!-- Bubble Pop -->
+    <div class="game-area" id="bubble">
       <button class="back-btn" onclick="showMenu()">⬅ Back</button>
-      <h2>🔮 Fortune Teller</h2>
-      <input type="text" id="fortuneQuestion" placeholder="Ask a yes/no question...">
-      <button class="action-btn" onclick="tellFortune()">🔮 Ask</button>
-      <div id="fortuneBox">Ask a question and tap Ask!</div>
-    </div>
-    
-    <!-- Meme Maker -->
-    <div class="game-area" id="meme">
-      <button class="back-btn" onclick="showMenu()">⬅ Back</button>
-      <h2>🎭 Meme Maker</h2>
-      <input type="text" id="topText" placeholder="Top text">
-      <input type="text" id="bottomText" placeholder="Bottom text">
-      <div style="background:#333;color:white;padding:30px;border-radius:15px;margin:20px 0;position:relative;">
-        <div id="memePreview" style="font-size:24px;font-weight:bold;text-transform:uppercase;text-align:center;">
-          <div id="previewTop" style="margin-bottom:20px;"></div>
-          <div style="font-size:80px;">😎</div>
-          <div id="previewBottom" style="margin-top:20px;"></div>
-        </div>
+      <h2>🫧 Bubble Pop!</h2>
+      <p style="color:#888;">Pop all the bubbles!</p>
+      <div class="score" id="bubbleScore">0</div>
+      <div id="bubbleArea" style="position:relative;width:100%;height:280px;background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:15px;margin:10px 0;overflow:hidden;">
       </div>
-      <button class="action-btn" onclick="updateMeme()">👀 Preview</button>
+      <button class="game-btn" onclick="spawnBubbles()">▶ START</button>
+    </div>
+    
+    <!-- Simon Says -->
+    <div class="game-area" id="simon">
+      <button class="back-btn" onclick="showMenu()">⬅ Back</button>
+      <h2>🔴 Simon Says!</h2>
+      <div style="display:flex;justify-content:center;gap:10px;margin:15px 0;">
+        <div id="simonRed" style="width:80px;height:80px;background:#ff6b6b;border-radius:15px;cursor:pointer;opacity:0.5;" onclick="simonClick(0)"></div>
+        <div id="simonBlue" style="width:80px;height:80px;background:#48dbfb;border-radius:15px;cursor:pointer;opacity:0.5;" onclick="simonClick(1)"></div>
+        <div id="simonGreen" style="width:80px;height:80px;background:#26de81;border-radius:15px;cursor:pointer;opacity:0.5;" onclick="simonClick(2)"></div>
+        <div id="simonYellow" style="width:80px;height:80px;background:#feca57;border-radius:15px;cursor:pointer;opacity:0.5;" onclick="simonClick(3)"></div>
+      </div>
+      <button class="game-btn" onclick="startSimon()">▶ START</button>
+    </div>
+    
+    <!-- Quick Math -->
+    <div class="game-area" id="math">
+      <button class="back-btn" onclick="showMenu()">⬅ Back</button>
+      <h2>🔢 Quick Math!</h2>
+      <p style="color:#888;">Solve 10 math problems!</p>
+      <div class="score" id="mathScore">0</div>
+      <div id="mathProblem" style="font-size:36px;color:white;margin:15px 0;">Press Start</div>
+      <input type="number" id="mathAnswer" placeholder="Answer" style="width:150px;padding:15px;font-size:24px;text-align:center;">
+      <br>
+      <button class="game-btn" onclick="checkMath()">✅ Submit</button>
+      <button class="game-btn" onclick="startMath()">▶ START</button>
+    </div>
+    
+    <!-- Color Click -->
+    <div class="game-area" id="color">
+      <button class="back-btn" onclick="showMenu()">⬅ Back</button>
+      <h2>🌈 Color Click!</h2>
+      <p style="color:#888;">Click the matching color!</p>
+      <div class="score" id="colorScore">0</div>
+      <div id="colorDisplay" style="width:150px;height:150px;border-radius:20px;margin:15px auto;cursor:pointer;" onclick="checkColor()"></div>
+      <button class="game-btn" onclick="nextColor()">▶ NEXT</button>
+    </div>
+    
+    <!-- ASMR -->
+    <div class="game-area" id="asmr">
+      <button class="back-btn" onclick="showMenu()">⬅ Back</button>
+      <h2>🌧️ ASMR Relax</h2>
+      <p style="color:#888;">Relaxing sounds</p>
+      <div style="margin:20px 0;">
+        <button class="rainBtn" onclick="toggleRain()">🌧️</button>
+        <button class="fireBtn" onclick="toggleFire()">🔥</button>
+        <button class="rainBtn" style="background:linear-gradient(135deg,#26de81,#20bf6b);" onclick="toggleWind()">🍃</button>
+      </div>
+      <p id="asmrStatus" style="color:#666;font-size:14px;">Tap an icon to toggle</p>
+    </div>
+    
+    <!-- Keep Balance -->
+    <div class="game-area" id="balance">
+      <button class="back-btn" onclick="showMenu()">⬅ Back</button>
+      <h2>🧊 Keep Balance!</h2>
+      <p style="color:#888;">Keep the ball balanced! (Tilt or use arrows)</p>
+      <canvas id="balanceCanvas" width="300" height="200" style="background:#1a1a2e;border-radius:15px;margin:10px auto;display:block;"></canvas>
+      <button class="game-btn" onclick="startBalance()">▶ START</button>
     </div>
   </div>
 
   <script>
+    // Audio context for ASMR
+    let audioCtx = null;
+    let rainSource = null, fireSource = null, windSource = null;
+    
     function showGame(id) {
       document.getElementById('menu').style.display = 'none';
       document.getElementById(id).classList.add('active');
-      if (id === 'wyr') nextWYR();
-      if (id === 'compliment') newCompliment();
     }
     
     function showMenu() {
@@ -307,124 +286,252 @@
       document.getElementById('menu').style.display = 'grid';
     }
     
-    // Tap Game
-    let tapCount = 0;
-    let tapTimer = null;
-    
-    function startTapGame() {
+    // Tap Rush
+    let tapCount = 0, tapInt = null;
+    function startTap() {
       tapCount = 0;
       document.getElementById('tapScore').textContent = '0';
-      document.getElementById('tapBtn').textContent = 'TAP!';
-      document.getElementById('tapBtn').disabled = true;
-      
-      setTimeout(() => {
-        document.getElementById('tapBtn').disabled = false;
-        tapTimer = setTimeout(() => {
-          document.getElementById('tapBtn').textContent = '⏰ Time!';
-          document.getElementById('tapBtn').disabled = true;
-        }, 5000);
+      let timeLeft = 3;
+      document.getElementById('tapScore').innerHTML = timeLeft;
+      tapInt = setInterval(() => {
+        timeLeft--;
+        if (timeLeft > 0) {
+          document.getElementById('tapScore').innerHTML = timeLeft;
+        } else {
+          clearInterval(tapInt);
+          document.getElementById('tapScore').innerHTML = tapCount;
+        }
       }, 1000);
     }
     
-    function tap() {
-      tapCount++;
-      document.getElementById('tapScore').textContent = tapCount;
+    // Reaction Test
+    let reactionTimeout = null;
+    function startReaction() {
+      document.getElementById('reactionResult').innerHTML = 'Wait...';
+      document.getElementById('reactionBtn').disabled = true;
+      let delay = 2000 + Math.random() * 3000;
+      reactionTimeout = setTimeout(() => {
+        let startTime = Date.now();
+        document.getElementById('reactionResult').innerHTML = '<span style="color:#26de81;font-size:24px;">TAP NOW!</span>';
+        document.getElementById('reactionBtn').onclick = () => {
+          let time = Date.now() - startTime;
+          document.getElementById('reactionResult').innerHTML = time + 'ms';
+          document.getElementById('reactionBtn').disabled = false;
+          document.getElementById('reactionBtn').onclick = startReaction;
+        };
+      }, delay);
     }
     
-    // Random Picker
-    let wheelRotation = 0;
+    // Aim Trainer
+    let aimScore = 0, aimTimeout = null;
+    function startAim() {
+      aimScore = 0;
+      document.getElementById('aimScore').textContent = '0';
+      let timeLeft = 10;
+      aimTimeout = setInterval(() => {
+        timeLeft--;
+        if (timeLeft <= 0) {
+          clearInterval(aimTimeout);
+          document.getElementById('aimScore').textContent = 'Done! Score: ' + aimScore;
+        } else {
+          moveTarget();
+        }
+      }, 1000);
+    }
+    function moveTarget() {
+      const area = document.getElementById('aimArea');
+      const x = Math.random() * (area.clientWidth - 50);
+      const y = Math.random() * (area.clientHeight - 50);
+      document.getElementById('aimTarget').style.left = x + 'px';
+      document.getElementById('aimTarget').style.top = y + 'px';
+    }
+    function hitTarget() {
+      aimScore++;
+      document.getElementById('aimScore').textContent = aimScore;
+      moveTarget();
+    }
     
-    function spin() {
-      const options = document.getElementById('wheelOptions').value.split(',').map(s => s.trim()).filter(s => s);
-      if (options.length < 2) {
-        alert('Enter at least 2 options!');
-        return;
+    // Memory Match
+    const memoryEmojis = ['🎮', '🎲', '🎯', '⚡', '🔥', '🌟', '💎', '🎭'];
+    let memoryCards = [], flippedCards = [], matched = 0;
+    function initMemory() {
+      let cards = [...memoryEmojis, ...memoryEmojis].sort(() => Math.random() - 0.5);
+      let html = '';
+      cards.forEach((c, i) => {
+        html += '<div onclick="flipCard(' + i + ')" id="mem' + i + '" style="background:#2d3436;padding:20px;font-size:30px;border-radius:10px;cursor:pointer;">❓</div>';
+      });
+      document.getElementById('memoryGrid').innerHTML = html;
+      memoryCards = cards;
+    }
+    function flipCard(i) {
+      if (flippedCards.includes(i) || flippedCards.length >= 2) return;
+      document.getElementById('mem' + i).textContent = memoryCards[i];
+      document.getElementById('mem' + i).style.background = '#636e72';
+      flippedCards.push(i);
+      if (flippedCards.length === 2) {
+        setTimeout(() => {
+          if (memoryCards[flippedCards[0]] === memoryCards[flippedCards[1]]) {
+            matched++;
+            if (matched === 8) alert('🎉 YOU WIN!');
+          } else {
+            document.getElementById('mem' + flippedCards[0]).textContent = '❓';
+            document.getElementById('mem' + flippedCards[1]).textContent = '❓';
+            document.getElementById('mem' + flippedCards[0]).style.background = '#2d3436';
+            document.getElementById('mem' + flippedCards[1]).style.background = '#2d3436';
+          }
+          flippedCards = [];
+        }, 500);
       }
-      
-      const wheel = document.getElementById('wheel');
-      const extraSpins = 5;
-      const randomAngle = Math.random() * 360;
-      wheelRotation += (extraSpins * 360) + randomAngle;
-      wheel.style.transform = 'rotate(' + wheelRotation + 'deg)';
-      
-      const winningIndex = Math.floor(((wheelRotation % 360) / 360) * options.length);
-      const winner = options[winningIndex];
-      
-      setTimeout(() => {
-        document.getElementById('spinResult').textContent = '🎉 ' + winner + '!';
-      }, 3000);
     }
     
-    // Would You Rather
-    const wyrQuestions = [
-      { a: 'Have infinite money', b: 'Have infinite time' },
-      { a: 'Be able to fly', b: 'Be invisible' },
-      { a: 'Live in the past', b: 'Live in the future' },
-      { a: 'Be a wizard', b: 'Be a superhero' },
-      { a: 'Never use social media again', b: 'Never watch TV again' },
-      { a: 'Be famous', b: 'Be the best friend of someone famous' },
-      { a: 'Have a rewind button in life', b: 'Have a pause button' },
-      { a: 'Eat pizza forever', b: 'Eat ice cream forever' },
-      { a: 'Always be 10 minutes late', b: 'Always be 20 minutes early' },
-      { a: 'Have no phone', b: 'Have no computer' }
-    ];
-    
-    function nextWYR() {
-      const q = wyrQuestions[Math.floor(Math.random() * wyrQuestions.length)];
-      document.getElementById('wyroption1').textContent = q.a;
-      document.getElementById('wyroption2').textContent = q.b;
-    }
-    
-    // Compliments
-    const compliments = [
-      'You are absolutely amazing! 🌟',
-      'Your smile lights up the room! 💫',
-      'You are capable of amazing things! 🚀',
-      'You make the world better just by being in it! 💖',
-      'Your creativity is inspiring! 🎨',
-      'You are stronger than you know! 💪',
-      'You make people feel welcome and loved! 🥰',
-      'Your kindness makes a difference! 🌈',
-      'You are enough, just as you are! ✨',
-      'Today is going to be a great day! ☀️'
-    ];
-    
-    function newCompliment() {
-      const c = compliments[Math.floor(Math.random() * compliments.length)];
-      document.getElementById('compliment').textContent = c;
-    }
-    
-    // Fortune Teller
-    const fortunes = [
-      'Yes! Definitely! 🎉',
-      'No way, sorry! 😢',
-      'Ask again later... 🔮',
-      'Absolutely! ✅',
-      'I see good things coming! 🌟',
-      'Not looking likely... ❌',
-      'Yes, but be patient! ⏰',
-      'The universe says YES! 🚀',
-      'Probably not... 🤔',
-      'Very likely! 📈'
-    ];
-    
-    function tellFortune() {
-      const q = document.getElementById('fortuneQuestion').value.trim();
-      if (!q) {
-        alert('Ask a question first!');
-        return;
+    // Bubble Pop
+    let bubbleScore = 0;
+    function spawnBubbles() {
+      bubbleScore = 0;
+      document.getElementById('bubbleScore').textContent = '0';
+      const area = document.getElementById('bubbleArea');
+      area.innerHTML = '';
+      for (let i = 0; i < 15; i++) {
+        let b = document.createElement('div');
+        b.style.cssText = 'position:absolute;width:' + (30 + Math.random()*30) + 'px;height:' + (30 + Math.random()*30) + 'px;background:rgba(72,219,251,0.6);border-radius:50%;left:' + Math.random()*250 + 'px;top:' + Math.random()*220 + 'px;cursor:pointer;border:2px solid rgba(255,255,255,0.3);';
+        b.onclick = function() { 
+          this.remove(); 
+          bubbleScore++; 
+          document.getElementById('bubbleScore').textContent = bubbleScore;
+        };
+        area.appendChild(b);
       }
-      const f = fortunes[Math.floor(Math.random() * fortunes.length)];
-      document.getElementById('fortuneBox').textContent = f;
     }
     
-    // Meme Maker
-    function updateMeme() {
-      const top = document.getElementById('topText').value;
-      const bottom = document.getElementById('bottomText').value;
-      document.getElementById('previewTop').textContent = top;
-      document.getElementById('previewBottom').textContent = bottom;
+    // Simon Says
+    let simonSeq = [], playerSeq = [], simonLevel = 0;
+    const simonColors = ['simonRed', 'simonBlue', 'simonGreen', 'simonYellow'];
+    function startSimon() {
+      simonSeq = [];
+      nextSimonRound();
     }
+    function nextSimonRound() {
+      simonSeq.push(Math.floor(Math.random() * 4));
+      playSimonSeq();
+    }
+    function playSimonSeq() {
+      let i = 0;
+      let int = setInterval(() => {
+        flashColor(simonSeq[i]);
+        i++;
+        if (i >= simonSeq.length) clearInterval(int);
+      }, 600);
+    }
+    function flashColor(idx) {
+      document.getElementById(simonColors[idx]).style.opacity = '1';
+      setTimeout(() => document.getElementById(simonColors[idx]).style.opacity = '0.5', 300);
+    }
+    function simonClick(idx) {
+      flashColor(idx);
+      playerSeq.push(idx);
+      if (playerSeq[playerSeq.length-1] !== simonSeq[playerSeq.length-1]) {
+        alert('Game Over! Score: ' + simonSeq.length);
+        playerSeq = [];
+      } else if (playerSeq.length === simonSeq.length) {
+        playerSeq = [];
+        setTimeout(nextSimonRound, 500);
+      }
+    }
+    
+    // Quick Math
+    let mathScore = 0, mathTotal = 0, currentAnswer = 0;
+    function startMath() {
+      mathScore = 0;
+      mathTotal = 10;
+      document.getElementById('mathScore').textContent = '0/10';
+      nextMath();
+    }
+    function nextMath() {
+      let a = Math.floor(Math.random() * 10) + 1;
+      let b = Math.floor(Math.random() * 10) + 1;
+      let op = Math.random() > 0.5 ? '+' : '-';
+      if (op === '-') { a = a + b; }
+      currentAnswer = op === '+' ? a + b : a - b;
+      document.getElementById('mathProblem').textContent = a + ' ' + op + ' ' + b + ' = ?';
+      mathTotal--;
+      if (mathTotal < 0) {
+        document.getElementById('mathProblem').textContent = 'Done! Score: ' + mathScore + '/10';
+      }
+    }
+    function checkMath() {
+      let ans = parseInt(document.getElementById('mathAnswer').value);
+      if (ans === currentAnswer) mathScore++;
+      document.getElementById('mathScore').textContent = mathScore + '/10';
+      document.getElementById('mathAnswer').value = '';
+      nextMath();
+    }
+    
+    // Color Click
+    const colors = ['#ff6b6b', '#48dbfb', '#26de81', '#feca57', '#a55eea', '#fd9644'];
+    let targetColor = '';
+    function nextColor() {
+      targetColor = colors[Math.floor(Math.random() * colors.length)];
+      document.getElementById('colorDisplay').style.background = targetColor;
+    }
+    function checkColor() {
+      alert('Color is ' + targetColor + '! Try to remember it for next time!');
+      nextColor();
+    }
+    
+    // ASMR Sounds
+    function initAudio() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    function playNoise(type) {
+      initAudio();
+      let bufferSize = 2 * audioCtx.sampleRate;
+      let noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      let output = noiseBuffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
+      let whiteNoise = audioCtx.createBufferSource();
+      whiteNoise.buffer = noiseBuffer;
+      whiteNoise.loop = true;
+      
+      let gainNode = audioCtx.createGain();
+      gainNode.gain.value = 0.1;
+      
+      whiteNoise.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      whiteNoise.start();
+      return whiteNoise;
+    }
+    function toggleRain() {
+      if (rainSource) { rainSource.stop(); rainSource = null; document.getElementById('asmrStatus').textContent = 'Rain stopped'; }
+      else { rainSource = playNoise('rain'); document.getElementById('asmrStatus').textContent = '🌧️ Rain playing...'; }
+    }
+    function toggleFire() {
+      if (fireSource) { fireSource.stop(); fireSource = null; document.getElementById('asmrStatus').textContent = 'Fire stopped'; }
+      else { fireSource = playNoise('fire'); document.getElementById('asmrStatus').textContent = '🔥 Fire crackling...'; }
+    }
+    function toggleWind() {
+      if (windSource) { windSource.stop(); windSource = null; document.getElementById('asmrStatus').textContent = 'Wind stopped'; }
+      else { windSource = playNoise('wind'); document.getElementById('asmrStatus').textContent = '🍃 Wind blowing...'; }
+    }
+    
+    // Keep Balance
+    let ballX = 150, ballY = 100, velX = 0, velY = 0, balanceInt = null;
+    function startBalance() {
+      ballX = 150; ballY = 100; velX = 0; velY = 0;
+      let canvas = document.getElementById('balanceCanvas');
+      let ctx = canvas.getContext('2d');
+      balanceInt = setInterval(() => {
+        velX += (Math.random() - 0.5) * 2;
+        velY += (Math.random() - 0.5) * 2;
+        ballX += velX;
+        ballY += velY;
+        if (ballX < 10 || ballX > 290) { clearInterval(balanceInt); alert('Game Over! Fell off!'); }
+        ctx.fillStyle = '#1a1a2e'; ctx.fillRect(0, 0, 300, 200);
+        ctx.beginPath(); ctx.arc(ballX, ballY, 15, 0, Math.PI*2); ctx.fillStyle = '#48dbfb'; ctx.fill();
+      }, 30);
+    }
+    
+    // Initialize
+    initMemory();
   </script>
 </body>
 </html>
