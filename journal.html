@@ -577,17 +577,24 @@
           const t = event.results[i][0].transcript.trim();
           if (!t) continue;
           if (event.results[i].isFinal) {
-            // Deduplicate repeated words
-            const words = t.split(' ');
-            const deduped = [];
-            let lastWord = '';
-            for (const w of words) {
-              if (w !== lastWord) {
-                deduped.push(w);
-                lastWord = w;
+            // More aggressive deduplication
+            let words = t.toLowerCase().split(/\s+/);
+            let deduped = [];
+            for (let j = 0; j < words.length; j++) {
+              // Skip if same as previous 2 words
+              if (j >= 2 && words[j] === words[j-1] && words[j] === words[j-2]) {
+                continue;
               }
+              // Skip if same as previous word (only for short words, not "I" or "a")
+              if (j >= 1 && words[j] === words[j-1] && words[j].length > 2) {
+                continue;
+              }
+              deduped.push(words[j]);
             }
-            final += deduped.join(' ') + ' ';
+            // Capitalize first letter back
+            let result = deduped.join(' ');
+            result = result.charAt(0).toUpperCase() + result.slice(1);
+            final += result + ' ';
           } else {
             interim += t;
           }
