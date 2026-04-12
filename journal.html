@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Voice Journal 📱</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Caveat:wght@500&display=swap');
     
     * { box-sizing: border-box; margin: 0; padding: 0; }
     
@@ -16,18 +16,18 @@
       transition: background 0.5s;
     }
     
-    /* Themes */
     .theme-space { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); }
     .theme-beach { background: linear-gradient(135deg, #00d2ff, #3a7bd5); }
     .theme-gaming { background: linear-gradient(135deg, #1a1a2e, #16213e); }
     .theme-anime { background: linear-gradient(135deg, #ff9a9e, #fecfef); }
     .theme-neon { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); }
+    .theme-forest { background: linear-gradient(135deg, #134e5e, #71b280); }
     
     .app {
-      max-width: 500px;
+      max-width: 600px;
       margin: 0 auto;
-      background: rgba(255,255,255,0.95);
-      border-radius: 24px;
+      background: #fff;
+      border-radius: 20px;
       overflow: hidden;
       box-shadow: 0 25px 50px rgba(0,0,0,0.3);
     }
@@ -39,30 +39,53 @@
       text-align: center;
     }
     
-    .header h1 { font-size: 24px; }
+    .header h1 { font-size: 28px; }
     .streak { font-size: 14px; margin-top: 5px; }
-    .streak span { color: #ff6b6b; }
+    .streak span { color: #ffd93d; }
     
-    .section { padding: 20px; }
+    .tabs {
+      display: flex;
+      background: #f0f0f0;
+    }
     
+    .tab {
+      flex: 1;
+      padding: 15px;
+      text-align: center;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    
+    .tab.active {
+      background: white;
+      color: #ff6b6b;
+      border-bottom: 3px solid #ff6b6b;
+    }
+    
+    .section { padding: 20px; display: none; }
+    .section.active { display: block; }
+    
+    /* Record Section */
     .mood-picker {
       display: flex;
       justify-content: center;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
+      margin-bottom: 15px;
     }
     
     .mood {
-      font-size: 32px;
-      padding: 10px;
-      background: #f0f0f0;
-      border-radius: 15px;
+      font-size: 28px;
+      padding: 8px;
+      background: #f5f5f5;
+      border-radius: 12px;
       cursor: pointer;
       transition: all 0.2s;
     }
     
-    .mood:hover { transform: scale(1.2); }
-    .mood.selected { background: #ffe66d; transform: scale(1.2); }
+    .mood:hover { transform: scale(1.15); }
+    .mood.selected { background: #ffe66d; transform: scale(1.15); box-shadow: 0 4px 15px rgba(255,230,109,0.5); }
     
     .prompt-box {
       background: linear-gradient(135deg, #667eea, #764ba2);
@@ -70,10 +93,12 @@
       padding: 15px;
       border-radius: 15px;
       text-align: center;
-      font-size: 18px;
+      font-size: 16px;
       margin: 15px 0;
       cursor: pointer;
     }
+    
+    .prompt-box:hover { transform: scale(1.02); }
     
     .record-btn {
       width: 100px;
@@ -98,24 +123,39 @@
       50% { transform: scale(1.1); }
     }
     
-    .timer { text-align: center; font-size: 24px; font-weight: bold; margin: 10px 0; }
+    .timer { text-align: center; font-size: 28px; font-weight: bold; margin: 10px 0; }
+    .status { text-align: center; color: #666; margin-bottom: 15px; }
     
-    .entry {
-      background: #f8f9fa;
+    .entry-preview {
+      background: #fafafa;
       border-radius: 15px;
-      padding: 15px;
+      padding: 20px;
       margin: 15px 0;
+      border: 2px dashed #ddd;
+    }
+    
+    .entry-preview .mood { font-size: 24px; }
+    .entry-text {
+      font-family: 'Caveat', cursive;
+      font-size: 22px;
+      line-height: 1.6;
+      margin: 10px 0;
       white-space: pre-wrap;
     }
     
-    .entry .mood { font-size: 20px; }
-    .entry .date { color: #666; font-size: 12px; }
-    .entry .ai-reaction { 
-      background: linear-gradient(90deg, #a8edea, #fed6e3); 
-      padding: 10px; 
-      border-radius: 10px;
-      margin-top: 10px;
+    .ai-opinion {
+      background: linear-gradient(135deg, #a8edea, #fed6e3);
+      padding: 15px;
+      border-radius: 12px;
+      margin-top: 15px;
       font-style: italic;
+    }
+    
+    .ai-thinking {
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+      margin: 10px 0;
     }
     
     .controls { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
@@ -130,106 +170,185 @@
     }
     
     .btn:hover { transform: translateY(-2px); }
-    .btn-theme { background: #667eea; color: white; }
-    .btn-sound { background: #feca57; color: #333; }
-    .btn-export { background: #ff6b6b; color: white; }
     .btn-save { background: #10b981; color: white; }
-    .btn-clear { background: #666; color: white; }
+    .btn-new { background: #667eea; color: white; }
+    .btn-clear { background: #ddd; color: #333; }
     
-    .themes { display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; flex-wrap: wrap; }
+    .themes { display: flex; gap: 8px; justify-content: center; margin: 15px 0; flex-wrap: wrap; }
     .theme-btn {
-      width: 30px;
-      height: 30px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
       border: 2px solid white;
       cursor: pointer;
     }
     
-    .history { max-height: 300px; overflow-y: auto; }
-    
-    .sound-fx {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 100px;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.3s;
+    /* Journal Book View */
+    .journal-book {
+      perspective: 1000px;
+      min-height: 400px;
+      position: relative;
     }
     
-    .sound-fx.show { opacity: 1; }
+    .journal-page {
+      background: #fffaf0;
+      border-radius: 10px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      min-height: 350px;
+      position: relative;
+      border: 1px solid #e8d5b7;
+    }
+    
+    .journal-page::before {
+      content: '';
+      position: absolute;
+      left: 40px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: #ffccc0;
+    }
+    
+    .page-number {
+      position: absolute;
+      bottom: 15px;
+      left: 60px;
+      color: #999;
+      font-size: 12px;
+    }
+    
+    .nav-arrows {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    
+    .nav-btn {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: none;
+      background: #ff6b6b;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+    }
+    
+    .nav-btn:disabled {
+      background: #ddd;
+      cursor: not-allowed;
+    }
+    
+    .page-indicator {
+      text-align: center;
+      margin-top: 15px;
+      color: #666;
+    }
+    
+    .empty-journal {
+      text-align: center;
+      color: #999;
+      padding: 50px;
+    }
+    
+    .empty-journal span {
+      font-size: 60px;
+      display: block;
+      margin-bottom: 20px;
+    }
   </style>
 </head>
 <body class="theme-gaming">
   <div class="app">
     <div class="header">
-      <h1>🎤 Voice Journal</h1>
+      <h1>📔 My Voice Journal</h1>
       <p class="streak">🔥 <span id="streakCount">0</span> day streak!</p>
     </div>
     
-    <div class="section">
-      <p style="text-align:center;color:#666;">Pick your mood:</p>
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('record')">🎤 New Entry</div>
+      <div class="tab" onclick="switchTab('journal')">📖 My Journal</div>
+    </div>
+    
+    <!-- Record Section -->
+    <div id="recordSection" class="section active">
+      <div style="text-align:center;color:#666;margin-bottom:10px;">How are you feeling?</div>
       <div class="mood-picker">
-        <div class="mood" onclick="selectMood('😎')" data-mood="😎">😎</div>
-        <div class="mood" onclick="selectMood('🤩')" data-mood="🤩">🤩</div>
-        <div class="mood" onclick="selectMood('😐')" data-mood="😐">😐</div>
-        <div class="mood" onclick="selectMood('😢')" data-mood="😢">😢</div>
-        <div class="mood" onclick="selectMood('😡')" data-mood="😡">😡</div>
-        <div class="mood" onclick="selectMood('🥳')" data-mood="🥳">🥳</div>
-        <div class="mood" onclick="selectMood('🤔')" data-mood="🤔">🤔</div>
-        <div class="mood" onclick="selectMood('🥰')" data-mood="🥰">🥰</div>
+        <div class="mood" onclick="selectMood('😎')">😎</div>
+        <div class="mood" onclick="selectMood('🤩')">🤩</div>
+        <div class="mood" onclick="selectMood('😐')">😐</div>
+        <div class="mood" onclick="selectMood('😢')">😢</div>
+        <div class="mood" onclick="selectMood('😡')">😡</div>
+        <div class="mood" onclick="selectMood('🥳')">🥳</div>
+        <div class="mood" onclick="selectMood('🤔')">🤔</div>
+        <div class="mood" onclick="selectMood('🥰')">🥰</div>
+        <div class="mood" onclick="selectMood('😴')">😴</div>
+        <div class="mood" onclick="selectMood('🤒')">🤒</div>
       </div>
       
       <div class="prompt-box" onclick="newPrompt()">
-        💭 Tap for a random prompt
-        <div id="promptText" style="font-size:14px;margin-top:5px;opacity:0.8;"></div>
+        💭 <span id="promptText">Tap for a prompt!</span>
       </div>
       
       <button id="recordBtn" class="record-btn" onclick="toggleRecord()">🎤</button>
       <div id="timer" class="timer">0:00</div>
-      <p id="status" style="text-align:center;color:#666;">Tap to start recording</p>
+      <p id="status" class="status">Tap to start recording</p>
       
-      <div id="entry" class="entry" style="display:none;">
-        <span id="entryMood"></span>
-        <p id="entryText"></p>
-        <p class="date" id="entryDate"></p>
-        <div id="aiReaction" class="ai-reaction"></div>
+      <div id="entryPreview" class="entry-preview" style="display:none;">
+        <span id="previewMood" style="font-size:24px;"></span>
+        <div id="previewText" class="entry-text"></div>
+        <div id="aiOpinion" class="ai-opinion" style="display:none;">
+          <strong>🤖 My Thoughts:</strong>
+          <p id="opinionText"></p>
+          <p id="reflectionPrompt" style="font-size:12px;color:#666;margin-top:8px;"></p>
+        </div>
+        <div id="aiThinking" class="ai-thinking" style="display:none;">🤔 Thinking...</div>
       </div>
       
-      <div class="controls" id="controls" style="display:none;">
-        <button class="btn btn-sound" onclick="playSound('whoosh')">🎵 Whoosh</button>
-        <button class="btn btn-sound" onclick="playSound('boing')">🎵 Boing</button>
-        <button class="btn btn-sound" onclick="playSound('success')">🎵 Ding!</button>
-        <button class="btn btn-export" onclick="exportEntry()">📸 Save</button>
-        <button class="btn btn-save" onclick="saveEntry()">💾 Save</button>
+      <div id="controls" class="controls" style="display:none;">
+        <button class="btn btn-save" onclick="saveEntry()">💾 Save to Journal</button>
+        <button class="btn btn-new" onclick="newEntry()">✨ New Entry</button>
         <button class="btn btn-clear" onclick="clearEntry()">🗑️ Clear</button>
       </div>
     </div>
     
-    <div class="section">
-      <h3>🎨 Themes</h3>
-      <div class="themes">
+    <!-- Journal Section -->
+    <div id="journalSection" class="section">
+      <div class="themes" style="margin-bottom:20px;">
         <div class="theme-btn" style="background:linear-gradient(135deg,#0f0c29,#302b63)" onclick="setTheme('space')"></div>
         <div class="theme-btn" style="background:linear-gradient(135deg,#00d2ff,#3a7bd5)" onclick="setTheme('beach')"></div>
         <div class="theme-btn" style="background:linear-gradient(135deg,#1a1a2e,#16213e)" onclick="setTheme('gaming')"></div>
         <div class="theme-btn" style="background:linear-gradient(135deg,#ff9a9e,#fecfef)" onclick="setTheme('anime')"></div>
-        <div class="theme-btn" style="background:linear-gradient(135deg,#00f260,#0575e6)" onclick="setTheme('neon')"></div>
+        <div class="theme-btn" style="background:linear-gradient(135deg,#134e5e,#71b280)" onclick="setTheme('forest')"></div>
       </div>
       
-      <h3>📚 Your Entries</h3>
-      <div id="history" class="history"></div>
+      <div class="journal-book">
+        <div id="journalPage" class="journal-page">
+          <div id="pageContent" class="empty-journal">
+            <span>📖</span>
+            <p>No entries yet!</p>
+            <p>Tap "New Entry" to write your first journal entry.</p>
+          </div>
+          <div id="pageNumber" class="page-number"></div>
+        </div>
+      </div>
+      
+      <div class="nav-arrows">
+        <button class="nav-btn" id="prevBtn" onclick="prevPage()">◀</button>
+        <button class="nav-btn" id="nextBtn" onclick="nextPage()">▶</button>
+      </div>
+      
+      <p class="page-indicator" id="pageIndicator">Page 0 of 0</p>
     </div>
   </div>
-  
-  <div id="soundFx" class="sound-fx">🎵</div>
 
   <script>
     const prompts = [
       "What's the most random thing that happened today?",
       "If you could have any superpower, what would it be?",
       "What's something that made you laugh today?",
-      "Describe your perfect day",
+      "Describe your perfect day.",
       "What's a goal you want to achieve this week?",
       "Who is someone you look up to? Why?",
       "What's something you're grateful for right now?",
@@ -238,22 +357,14 @@
       "What's the best thing that happened this week?",
       "If you could travel anywhere, where would you go?",
       "What's something new you learned today?",
-      "Describe your best friend",
+      "Describe your best friend.",
       "What's a rule you wish didn't exist?",
-      "What's your favorite game right now?"
-    ];
-    
-    const aiReactions = [
-      "🔥 That's honestly epic!",
-      "😂 I'm literally cryinggg",
-      "🙌 Living for this energy!",
-      "💯 Absolute legend behavior!",
-      "🤯 Wait that's actually crazy!",
-      "❤️‍🔥 This is giving main character energy!",
-      "✨ Slay queen/king!",
-      "🎉 Periodt! No cap!",
-      "💪 We love to see it!",
-      "😤 I can't even... so cool!"
+      "What's your favorite game right now?",
+      "What's something that frustrated you today?",
+      "If you could meet anyone, who would it be?",
+      "What's a happy memory you have?",
+      "What's something you want to learn?",
+      "How are you really feeling right now?"
     ];
     
     let selectedMood = '';
@@ -261,18 +372,30 @@
     let recognition = null;
     let timer = null;
     let seconds = 0;
-    let transcript = '';
+    let rawTranscript = '';
+    let currentEntry = null;
     let entries = JSON.parse(localStorage.getItem('journalEntries') || '[]');
     let streak = parseInt(localStorage.getItem('journalStreak') || '0');
+    let currentPage = 0;
     
-    // Load streak
+    // Load
     document.getElementById('streakCount').textContent = streak;
-    
-    // Load history
-    renderHistory();
-    
-    // New prompt on load
     newPrompt();
+    updateJournalView();
+    
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      
+      if (tab === 'record') {
+        document.querySelector('.tab:first-child').classList.add('active');
+        document.getElementById('recordSection').classList.add('active');
+      } else {
+        document.querySelector('.tab:last-child').classList.add('active');
+        document.getElementById('journalSection').classList.add('active');
+        updateJournalView();
+      }
+    }
     
     function newPrompt() {
       const prompt = prompts[Math.floor(Math.random() * prompts.length)];
@@ -294,11 +417,8 @@
     }
     
     function toggleRecord() {
-      if (isRecording) {
-        stopRecording();
-      } else {
-        startRecording();
-      }
+      if (isRecording) stopRecording();
+      else startRecording();
     }
     
     function startRecording() {
@@ -314,7 +434,7 @@
       
       recognition.onstart = function() {
         isRecording = true;
-        transcript = '';
+        rawTranscript = '';
         seconds = 0;
         document.getElementById('recordBtn').classList.add('recording');
         document.getElementById('recordBtn').textContent = '⏹';
@@ -335,7 +455,7 @@
             interim += event.results[i][0].transcript;
           }
         }
-        if (final) transcript += final;
+        if (final) rawTranscript += final;
         if (interim) document.getElementById('status').textContent = '📝 ' + interim.substring(0,50);
       };
       
@@ -360,17 +480,39 @@
       document.getElementById('recordBtn').classList.remove('recording');
       document.getElementById('recordBtn').textContent = '🎤';
       
-      if (transcript) {
-        showEntry(transcript);
+      if (rawTranscript) {
+        processAndShowEntry(rawTranscript);
       } else {
-        document.getElementById('status').textContent = 'No speech detected';
+        document.getElementById('status').textContent = 'No speech detected, try again';
       }
     }
     
-    function addAutoEmojis(text) {
-      text = text.toLowerCase();
-      let result = text;
+    function addProperPunctuation(text) {
+      // Add punctuation where missing
+      let result = text.trim();
       
+      // Capitalize first letter
+      result = result.charAt(0).toUpperCase() + result.slice(1);
+      
+      // Add period if no ending punctuation
+      if (!result.match(/[.!?]$/)) {
+        result += '.';
+      }
+      
+      // Fix spacing before punctuation
+      result = result.replace(/\s+([.!?])/g, '$1');
+      
+      // Add periods after lowercase letters that look like sentence endings
+      result = result.replace(/([a-z])\s+([A-Z])/g, '$1. $2');
+      
+      // Clean up multiple spaces
+      result = result.replace(/\s+/g, ' ');
+      
+      return result;
+    }
+    
+    function addAutoEmojis(text) {
+      let result = text.toLowerCase();
       const emojiMap = {
         'happy': '😊', 'glad': '😊', 'excited': '🤩', 'love': '🥰',
         'sad': '😢', 'cry': '😢', 'angry': '😡', 'mad': '😡',
@@ -378,33 +520,69 @@
         'fire': '🔥', 'lit': '🔥', 'go': '💪', 'win': '🏆',
         'game': '🎮', 'music': '🎵', 'food': '🍕', 'pizza': '🍕',
         'sleep': '😴', 'tired': '😴', 'sick': '🤒', 'hurt': '😣',
-        'think': '🤔', 'idea': '💡', 'money': '💰', 'star': '⭐'
+        'think': '🤔', 'idea': '💡', 'money': '💰', 'star': '⭐',
+        'friend': '👫', 'family': '👨‍👩‍👧', 'school': '🏫', 'home': '🏠'
       };
       
+      let emojis = [];
       for (const [word, emoji] of Object.entries(emojiMap)) {
-        if (text.includes(word) && !result.includes(emoji)) {
-          result += ' ' + emoji;
+        if (result.includes(word) && !emojis.includes(emoji)) {
+          emojis.push(emoji);
         }
+      }
+      
+      if (emojis.length > 0) {
+        result += ' ' + emojis.join(' ');
       }
       
       return result;
     }
     
-    function showEntry(text) {
-      const cleaned = addAutoEmojis(text);
+    async function processAndShowEntry(text) {
       const mood = selectedMood || '🤔';
-      const date = new Date().toLocaleString('en-AU');
-      const aiReaction = aiReactions[Math.floor(Math.random() * aiReactions.length)];
       
-      document.getElementById('entry').style.display = 'block';
-      document.getElementById('entryMood').textContent = mood;
-      document.getElementById('entryText').textContent = cleaned;
-      document.getElementById('entryDate').textContent = date;
-      document.getElementById('aiReaction').textContent = '🤖 ' + aiReaction;
+      // Process text with proper punctuation and emojis
+      let processedText = addProperPunctuation(text);
+      processedText = addAutoEmojis(processedText);
+      
+      currentEntry = {
+        mood: mood,
+        text: processedText,
+        rawText: text,
+        date: new Date().toLocaleString('en-AU'),
+        opinion: null
+      };
+      
+      // Show preview
+      document.getElementById('entryPreview').style.display = 'block';
+      document.getElementById('previewMood').textContent = mood;
+      document.getElementById('previewText').textContent = processedText;
       document.getElementById('controls').style.display = 'flex';
       document.getElementById('status').textContent = 'Tap mic to record again';
       
-      // Update streak
+      // Get AI opinion
+      document.getElementById('aiOpinion').style.display = 'none';
+      document.getElementById('aiThinking').style.display = 'block';
+      
+      try {
+        const res = await fetch('/api/journal', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ entryText: text, mood: mood })
+        });
+        const data = await res.json();
+        
+        if (data.opinion) {
+          currentEntry.opinion = data.opinion;
+          document.getElementById('opinionText').textContent = data.opinion;
+          document.getElementById('reflectionPrompt').textContent = data.reflectionPrompt || '';
+          document.getElementById('aiOpinion').style.display = 'block';
+        }
+      } catch(e) {
+        console.log('AI opinion failed:', e);
+      }
+      
+      document.getElementById('aiThinking').style.display = 'none';
       updateStreak();
     }
     
@@ -421,56 +599,74 @@
     }
     
     function saveEntry() {
-      const entry = {
-        mood: selectedMood || '🤔',
-        text: document.getElementById('entryText').textContent,
-        date: new Date().toLocaleString('en-AU'),
-        aiReaction: document.getElementById('aiReaction').textContent
-      };
+      if (!currentEntry) return;
       
-      entries.unshift(entry);
+      entries.unshift(currentEntry);
       localStorage.setItem('journalEntries', JSON.stringify(entries));
-      renderHistory();
-      playSound('success');
+      alert('Saved to your journal! 📖');
     }
     
-    function renderHistory() {
-      const container = document.getElementById('history');
-      container.innerHTML = entries.map(e => `
-        <div class="entry">
-          <span style="font-size:20px">${e.mood}</span>
-          <p>${e.text}</p>
-          <p class="date">${e.date}</p>
-          <div class="ai-reaction">${e.aiReaction}</div>
-        </div>
-      `).join('');
+    function newEntry() {
+      clearEntry();
+      newPrompt();
     }
     
     function clearEntry() {
-      document.getElementById('entry').style.display = 'none';
+      document.getElementById('entryPreview').style.display = 'none';
       document.getElementById('controls').style.display = 'none';
-      transcript = '';
+      rawTranscript = '';
+      currentEntry = null;
       selectedMood = '';
       document.querySelectorAll('.mood').forEach(m => m.classList.remove('selected'));
     }
     
-    function playSound(type) {
-      const soundFx = document.getElementById('soundFx');
+    // Journal Book Navigation
+    function updateJournalView() {
+      const content = document.getElementById('pageContent');
+      const indicator = document.getElementById('pageIndicator');
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const pageNum = document.getElementById('pageNumber');
       
-      if (type === 'whoosh') {
-        soundFx.textContent = '💨';
-      } else if (type === 'boing') {
-        soundFx.textContent = '🐰';
-      } else if (type === 'success') {
-        soundFx.textContent = '🎉';
+      if (entries.length === 0) {
+        content.innerHTML = '<div class="empty-journal"><span>📖</span><p>No entries yet!</p><p>Tap "New Entry" to write your first journal entry.</p></div>';
+        indicator.textContent = 'Page 0 of 0';
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+        pageNum.textContent = '';
+        return;
       }
       
-      soundFx.classList.add('show');
-      setTimeout(() => soundFx.classList.remove('show'), 500);
+      const totalPages = entries.length;
+      const entry = entries[currentPage];
+      
+      content.innerHTML = `
+        <div style="margin-left:30px;">
+          <div style="font-size:28px;margin-bottom:10px;">${entry.mood}</div>
+          <div style="font-size:12px;color:#999;margin-bottom:15px;">${entry.date}</div>
+          <div class="entry-text" style="font-size:20px;">${entry.text}</div>
+          ${entry.opinion ? `<div class="ai-opinion" style="margin-top:20px;font-size:14px;"><strong>🤖 My Thoughts:</strong><p>${entry.opinion}</p></div>` : ''}
+        </div>
+      `;
+      
+      indicator.textContent = `Page ${currentPage + 1} of ${totalPages}`;
+      pageNum.textContent = `Page ${currentPage + 1}`;
+      prevBtn.disabled = currentPage === 0;
+      nextBtn.disabled = currentPage >= totalPages - 1;
     }
     
-    function exportEntry() {
-      alert('📸 Screenshot this page to share your entry!');
+    function prevPage() {
+      if (currentPage > 0) {
+        currentPage--;
+        updateJournalView();
+      }
+    }
+    
+    function nextPage() {
+      if (currentPage < entries.length - 1) {
+        currentPage++;
+        updateJournalView();
+      }
     }
   </script>
 </body>
