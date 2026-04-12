@@ -224,6 +224,21 @@
     }
 
     function formatNote(text) {
+      // Remove duplicate words
+      let words = text.toLowerCase().split(/\s+/);
+      let deduped = [];
+      for (let j = 0; j < words.length; j++) {
+        if (j >= 1 && words[j] === words[j-1]) continue; // skip doubles
+        if (j >= 2 && words[j] === words[j-2]) continue; // skip triples
+        deduped.push(words[j]);
+      }
+      text = deduped.join(' ');
+      
+      // Capitalize first letter and add period if needed
+      text = text.trim();
+      text = text.charAt(0).toUpperCase() + text.slice(1);
+      if (!text.match(/[.!?]$/)) text += '.';
+      
       const now = new Date();
       const date = now.toLocaleDateString('en-AU', {day:'numeric', month:'long', year:'numeric'});
       return 'Client: [Name]\nDate/Time: 11:00am – 2:00pm\nService Type: Social & Domestic Support / Transport\n\nACTIVITIES UNDERTAKEN:\n' + text + '\n\nWELLBEING/OUTCOME:\n- Client remained happy, healthy, and engaged.\n- All tasks completed.\n\nDEPARTURE:\nLeft at 2:00pm on time.';
