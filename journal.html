@@ -638,6 +638,22 @@
     function addProperPunctuation(text) {
       let result = text.trim();
       
+      // Remove duplicate words more aggressively
+      let words = result.toLowerCase().split(/\s+/);
+      let deduped = [];
+      for (let j = 0; j < words.length; j++) {
+        // Skip if same as previous word
+        if (j >= 1 && words[j] === words[j-1]) {
+          continue;
+        }
+        // Skip if same as 2 words back (for triple repeats)
+        if (j >= 2 && words[j] === words[j-2]) {
+          continue;
+        }
+        deduped.push(words[j]);
+      }
+      result = deduped.join(' ');
+      
       // Fix "i" to "I" - standalone
       result = result.replace(/\bi\b/g, 'I');
       // Fix "i'm" to "I'm"
