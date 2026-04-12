@@ -287,17 +287,10 @@
     }
 
     function sendFeedback() {
-      const text = document.getElementById('feedbackText').value.trim();
-      if (!text) {
-        alert('Please type some feedback first!');
-        return;
-      }
-      
-      // Send feedback (for now just show it works - in production would save to database)
-      alert('Thank you for your feedback! This helps us improve EziNotes. 💜');
-      document.getElementById('feedbackText').value = '';
+      // Open Google Form in new tab
+      window.open('https://docs.google.com/forms/d/e/1FAIpQLSePhzuaFIR6WwDINMza57DM8wSM0uEGzOfXN8wj_BlKgzIGxw/viewform?usp=publish_editor', '_blank');
       document.getElementById('feedbackSection').style.display = 'none';
-      statusEl.textContent = 'Feedback sent!';
+      statusEl.textContent = 'Thanks for testing!';
     }
   </script>
 </body>
