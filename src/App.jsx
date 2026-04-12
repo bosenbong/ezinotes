@@ -73,15 +73,29 @@ export default function App() {
     }
     
     recognition.onend = () => {
-      // Don't auto-restart - Web Speech API is unreliable on mobile
-      // Just stop cleanly and let user restart manually
-      setIsRecording(false)
-      clearInterval(timerRef.current)
-      if (transcript) {
-        setStatus('Done!')
-        show('Note ready!')
+      // If still recording and we have a transcript, auto-restart to keep capturing
+      // This handles continuous = false mode where it stops after each sentence
+      if (isRecording && recognitionRef.current) {
+        try {
+          recognitionRef.current.start()
+        } catch(e) {
+          // Failed to restart - stop cleanly
+          setIsRecording(false)
+          clearInterval(timerRef.current)
+          if (transcript) {
+            setStatus('Done!')
+            show('Note ready!')
+          }
+        }
       } else {
-        setStatus('Recording stopped - tap mic to try again')
+        // User stopped it
+        clearInterval(timerRef.current)
+        if (transcript) {
+          setStatus('Done!')
+          show('Note ready!')
+        } else {
+          setStatus('Recording stopped - tap mic to try again')
+        }
       }
     }
     
