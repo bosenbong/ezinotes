@@ -157,10 +157,20 @@
       recognition.onresult = function(event) {
         let final = '', interim = '';
         for (let i = event.resultIndex; i < event.results.length; i++) {
+          const t = event.results[i][0].transcript.trim();
+          if (!t) continue;
           if (event.results[i].isFinal) {
-            final += event.results[i][0].transcript + ' ';
+            // Remove duplicate words
+            let words = t.toLowerCase().split(/\s+/);
+            let deduped = [];
+            for (let j = 0; j < words.length; j++) {
+              if (j >= 1 && words[j] === words[j-1]) continue; // Skip same word twice
+              if (j >= 2 && words[j] === words[j-2]) continue; // Skip triple
+              deduped.push(words[j]);
+            }
+            final += deduped.join(' ') + ' ';
           } else {
-            interim += event.results[i][0].transcript;
+            interim += t;
           }
         }
         if (final) fullTranscript += final;
