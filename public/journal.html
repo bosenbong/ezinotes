@@ -7,24 +7,27 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: sans-serif; background: #1a1a2e; min-height: 100vh; padding: 20px; }
-    .app { max-width: 500px; margin: 0 auto; background: #fff; border-radius: 10px; overflow: hidden; }
-    .header { background: #667eea; color: white; padding: 20px; text-align: center; }
+    .app { max-width: 500px; margin: 0 auto; background: #fffef5; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
+    .header { background: linear-gradient(135deg, #ff6b6b, #feca57); color: white; padding: 20px; text-align: center; }
     .header h1 { font-size: 24px; }
-    .tabs { display: flex; background: #333; }
-    .tab { flex: 1; padding: 15px; text-align: center; color: white; cursor: pointer; }
-    .tab.active { background: #667eea; }
+    .tabs { display: flex; background: #ff6b6b; }
+    .tab { flex: 1; padding: 15px; text-align: center; color: rgba(255,255,255,0.8); cursor: pointer; font-weight: bold; }
+    .tab.active { background: #fffef5; color: #ff6b6b; }
     .section { padding: 20px; display: none; }
     .section.active { display: block; }
     .mood-picker { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px; }
-    .mood { font-size: 30px; padding: 10px; cursor: pointer; }
-    .mood.selected { background: #ffe66d; border-radius: 10px; }
-    .record-btn { width: 100px; height: 100px; border-radius: 50%; background: #667eea; color: white; font-size: 40px; border: none; cursor: pointer; }
-    .record-btn.recording { background: #ff4757; }
-    .timer { text-align: center; font-size: 24px; margin: 10px 0; }
-    .status { text-align: center; color: #666; margin-bottom: 15px; }
-    .entry { background: #f5f5f5; padding: 15px; border-radius: 10px; margin: 15px 0; white-space: pre-wrap; }
-    .btn { padding: 12px 20px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; margin: 5px; }
-    .btn-clear { background: #ff4757; }
+    .mood { font-size: 35px; padding: 8px; cursor: pointer; transition: transform 0.2s; }
+    .mood:hover { transform: scale(1.2); }
+    .mood.selected { background: #ffe66d; border-radius: 50%; }
+    .record-btn { width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, #ff6b6b, #feca57); color: white; font-size: 50px; border: none; cursor: pointer; box-shadow: 0 5px 20px rgba(255,107,107,0.4); transition: all 0.3s; }
+    .record-btn:hover { transform: scale(1.05); }
+    .record-btn.recording { background: #ff4757; animation: pulse 0.5s infinite; }
+    @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
+    .timer { text-align: center; font-size: 28px; font-weight: bold; margin: 10px 0; color: #ff6b6b; }
+    .status { text-align: center; color: #666; margin-bottom: 15px; font-size: 14px; }
+    .entry { background: #f8f9fa; padding: 20px; border-radius: 15px; margin: 15px 0; white-space: pre-wrap; font-size: 16px; line-height: 1.6; }
+    .btn { padding: 14px 24px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 10px; cursor: pointer; margin: 5px; font-weight: bold; }
+    .btn-clear { background: linear-gradient(135deg, #ff4757, #ff6b6b); }
     .chat-messages { height: 200px; overflow-y: auto; background: #f5f5f5; padding: 10px; border-radius: 10px; margin-bottom: 10px; }
     .chat-input { width: 70%; padding: 10px; border-radius: 5px; border: 1px solid #ddd; }
     .chat-send { padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; }
@@ -109,6 +112,19 @@
     }
     
     function startRecording() {
+      // Check mic permission first
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(function(stream) {
+          stream.getTracks().forEach(track => track.stop());
+          startSpeech();
+        })
+        .catch(function(err) {
+          document.getElementById('status').textContent = 'Allow mic access!';
+          alert('Please allow microphone permission');
+        });
+    }
+    
+    function startSpeech() {
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SR) { alert('Use Chrome!'); return; }
       
