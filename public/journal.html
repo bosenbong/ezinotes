@@ -266,18 +266,7 @@
       <p class="streak">🔥 <span id="streakCount">0</span> day streak!</p>
     </div>
     
-    <!-- Splash Cover (shown on load) -->
-    <div id="splashCover" onclick="openJournal()" style="cursor:pointer;">
-      <div style="padding:40px 20px;text-align:center;">
-        <div id="splashGif" style="font-size:80px;margin-bottom:20px;"></div>
-        <div id="splashTitle" style="font-size:32px;font-weight:bold;margin-bottom:10px;">My Journal 📔</div>
-        <div id="splashName" style="font-size:18px;color:#666;margin-bottom:30px;">By Henry</div>
-        <canvas id="splashCanvas" width="300" height="150" style="border-radius:15px;margin-bottom:20px;"></canvas>
-        <p style="color:#999;font-size:14px;">Tap to open your journal 📖</p>
-      </div>
-    </div>
-    
-    <div class="tabs" id="mainTabs" style="display:none;">
+    <div class="tabs" id="mainTabs">
       <div class="tab active" onclick="switchTab('record')">🎤 New Entry</div>
       <div class="tab" onclick="switchTab('journal')">📖 My Journal</div>
       <div class="tab" onclick="switchTab('cover')">🎨 Cover</div>
@@ -494,37 +483,6 @@
     document.getElementById('streakCount').textContent = streak;
     newPrompt();
     updateJournalView();
-    initSplashCover();
-    
-    function openJournal() {
-      document.getElementById('splashCover').style.display = 'none';
-      document.getElementById('mainTabs').style.display = 'flex';
-    }
-    
-    function initSplashCover() {
-      const splash = document.getElementById('splashCover');
-      splash.style.background = coverColor || '#ff6b6b';
-      document.getElementById('splashGif').textContent = coverGif;
-      document.getElementById('splashName').textContent = 'By ' + (document.getElementById('coverNameInput').value || 'Henry');
-      
-      // Copy any drawing from main canvas
-      const mainCanvas = document.getElementById('drawCanvas');
-      const splashCanvas = document.getElementById('splashCanvas');
-      if (mainCanvas && splashCanvas) {
-        const ctx = splashCanvas.getContext('2d');
-        // Create gradient background
-        const gradient = ctx.createLinearGradient(0, 0, 300, 150);
-        gradient.addColorStop(0, coverColor || '#ff6b6b');
-        gradient.addColorStop(1, coverColor ? shadeColor(coverColor, -20) : '#feca57');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, 300, 150);
-      }
-    }
-    
-    function shadeColor(color, percent) {
-      // Simple color shading
-      return color; // Just return original for now
-    }
     
     function switchTab(tab) {
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -976,19 +934,16 @@
     function updateCover() {
       const name = document.getElementById('coverNameInput').value || 'Henry';
       document.getElementById('coverName').textContent = 'By ' + name;
-      document.getElementById('splashName').textContent = 'By ' + name;
     }
     
     function setCoverColor(color) {
       coverColor = color;
       document.getElementById('coverPreview').style.background = color;
-      document.getElementById('splashCover').style.background = color;
     }
     
     function setCoverGif(gif) {
       coverGif = gif;
       document.getElementById('coverGif').textContent = gif;
-      document.getElementById('splashGif').textContent = gif;
     }
     
     function setFont(font) {
