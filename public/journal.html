@@ -537,8 +537,9 @@
       }
       
       recognition = new SR();
-      recognition.continuous = true;
+      recognition.continuous = false;
       recognition.interimResults = true;
+      recognition.lang = 'en-AU';
       
       recognition.onstart = function() {
         isRecording = true;
@@ -571,6 +572,10 @@
         if (isRecording) {
           try { recognition.start(); } catch(e) {}
         }
+      };
+      
+      recognition.onerror = function(event) {
+        document.getElementById('status').textContent = 'Error: ' + event.error;
       };
       
       try {
