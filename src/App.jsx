@@ -28,7 +28,7 @@ export default function App() {
     }
     
     const recognition = new SpeechRecognition()
-    recognition.continuous = true
+    recognition.continuous = false
     recognition.interimResults = true
     recognitionRef.current = recognition
     
