@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>EziNotes</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EziNotes - Voice to NDIS Notes</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { 
@@ -26,7 +26,7 @@
       padding: 24px;
       text-align: center;
     }
-    .header h1 { font-size: 24px; }
+    .header h1 { font-size: 24px; margin: 0; }
     .content { padding: 24px; text-align: center; }
     .record-btn {
       width: 120px;
@@ -39,6 +39,7 @@
       cursor: pointer;
     }
     .record-btn.recording { background: #ef4444; }
+    .timer { font-size: 32px; font-weight: bold; margin: 10px 0; }
     .status { margin-top: 12px; color: #666; }
     .note-box {
       background: #f3f4f6;
@@ -50,6 +51,19 @@
       font-size: 14px;
       text-align: left;
     }
+    .btn-row { display: flex; gap: 10px; margin-top: 12px; }
+    .btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-polish { background: linear-gradient(135deg, #10b981, #059669); color: white; }
+    .btn-copy { background: #3b82f6; color: white; }
+    .btn-save { background: #8b5cf6; color: white; }
   </style>
 </head>
 <body>
@@ -60,177 +74,160 @@
     </div>
     <div class="content">
       <button id="recordBtn" class="record-btn">🎤</button>
+      <div id="timer" class="timer">0:00</div>
       <p id="status" class="status">Tap mic to start</p>
       <div id="noteBox" class="note-box">Your note will appear here...</div>
-      <div id="toast" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#111;color:white;padding:12px 24px;border-radius:8px;">Test</div>
+      <div id="btnRow" class="btn-row" style="display:none;">
+        <button class="btn btn-polish" onclick="polishNote()">✨ Polish (AI)</button>
+      </div>
+      <div id="btnRow2" class="btn-row" style="display:none;">
+        <button class="btn btn-copy" onclick="copyNote()">📋 Copy</button>
+        <button class="btn btn-save" onclick="saveNote()">💾 Save</button>
+      </div>
     </div>
   </div>
+
   <script>
     const recordBtn = document.getElementById('recordBtn');
     const statusEl = document.getElementById('status');
     const noteBox = document.getElementById('noteBox');
-    const toast = document.getElementById('toast');
+    const timerEl = document.getElementById('timer');
+    const btnRow = document.getElementById('btnRow');
+    const btnRow2 = document.getElementById('btnRow2');
+    
     let isRecording = false;
     let recognition = null;
     let timer = null;
     let seconds = 0;
     let fullTranscript = '';
 
-    function show(msg) {
-      toast.textContent = msg;
-      toast.style.display = 'block';
-      setTimeout(() => toast.style.display = 'none', 3000);
-    }
-
     function fmtTime(s) {
       return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
     }
 
-    function fmtNote(text) {
-      if (!text) return '';
-      const now = new Date();
-      const date = now.toLocaleDateString('en-AU', {day:'numeric', month:'long', year:'numeric'});
-      return 'Client: [Name]\\nDate/Time: 11:00am – 2:00pm\\nService Type: Social & Domestic Support / Transport\\n\\nACTIVITIES UNDERTAKEN:\\n' + text + '\\n\\nWELLBEING/OUTCOME:\\n- Client remained happy, healthy, and engaged.\\n- All tasks completed.\\n\\nDEPARTURE:\\nLeft at 2:00pm on time.';
-    }
-
-    recordBtn.onclick = () => {
+    recordBtn.onclick = function() {
       if (isRecording) {
-        if (recognition) recognition.stop();
-        isRecording = false;
-        recordBtn.textContent = '🎤';
-        recordBtn.classList.remove('recording');
-        clearInterval(timer);
-        statusEl.textContent = 'Done! Check your note';
-        show('Recording stopped');
+        stopRecording();
       } else {
-        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!SR) {
-          statusEl.textContent = 'Speech not supported - try Chrome';
-          show('Not supported');
-          return;
-        }
-        recognition = new SR();
-        recognition.continuous = true;
-        recognition.interimResults = true;
-        
-        recognition.onstart = () => {
-          isRecording = true;
-          fullTranscript = '';
-          seconds = 0;
-          recordBtn.textContent = '⏹';
-          recordBtn.classList.add('recording');
-          statusEl.textContent = 'Recording... speak now';
-          show('Recording...');
-          timer = setInterval(() => {
-            seconds++;
-            statusEl.textContent = 'Recording: ' + fmtTime(seconds);
-          }, 1000);
-        };
-        
-        recognition.onresult = (e) => {
-          let final = '', interim = '';
-          for (let i = e.resultIndex; i < e.results.length; i++) {
-            const t = e.results[i][0].transcript;
-            if (e.results[i].isFinal) final += t + ' ';
-            else interim += t;
-          }
-          if (final) fullTranscript += final;
-          if (interim) statusEl.textContent = 'Listening: ' + interim.substring(0,30) + '...';
-        };
-        
-        recognition.onerror = (e) => {
-          statusEl.textContent = 'Error: ' + e.error;
-          show(e.error);
-        };
-        
-        recognition.onend = () => {
-          // Show the formatted note when recording ends
-          if (fullTranscript) {
-            const formatted = fmtNote(fullTranscript);
-            noteBox.textContent = formatted;
-            statusEl.textContent = 'Note ready!';
-            show('Done!');
-            // Add polish button
-            addPolishButton();
-          } else {
-            statusEl.textContent = 'No speech detected';
-            show('Try again');
-          }
-          if (isRecording) try { recognition.start(); } catch(e) {}
-        };
-        
-        function addPolishButton() {
-          const existing = document.getElementById('polishBtn');
-          if (existing) return;
-          
-          const btn = document.createElement('button');
-          btn.id = 'polishBtn';
-          btn.textContent = '✨ Polish Note (AI)';
-          btn.style.cssText = 'margin-top:12px;padding:12px 20px;background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;width:100%;';
-          btn.onclick = async () => {
-            const originalText = btn.textContent;
-            btn.textContent = '⏳ Polishing...';
-            btn.disabled = true;
-            try {
-              const res = await fetch('/api/polish', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ transcript: fullTranscript })
-              });
-              const data = await res.json();
-              if (data.polishedNote) {
-                noteBox.textContent = data.polishedNote;
-                show('Note polished!');
-              } else {
-                show('Error: ' + (data.error || 'Failed'));
-              }
-            } catch(e) {
-              show('Error: ' + e.message);
-            }
-            btn.textContent = originalText;
-            btn.disabled = false;
-          };
-          noteBox.parentNode.insertBefore(btn, noteBox.nextSibling);
-          
-          // Add Copy and Save buttons
-          const btnRow = document.createElement('div');
-          btnRow.style.cssText = 'display:flex;gap:12px;margin-top:12px;';
-          
-          const copyBtn = document.createElement('button');
-          copyBtn.textContent = '📋 Copy';
-          copyBtn.style.cssText = 'flex:1;padding:12px;background:#3b82f6;color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;';
-          copyBtn.onclick = () => {
-            navigator.clipboard.writeText(noteBox.textContent);
-            show('Copied!');
-          };
-          
-          const saveBtn = document.createElement('button');
-          saveBtn.textContent = '💾 Save';
-          saveBtn.style.cssText = 'flex:1;padding:12px;background:#10b981;color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;';
-          saveBtn.onclick = () => {
-            const blob = new Blob([noteBox.textContent], {type: 'text/plain'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'note-' + new Date().toISOString().split('T')[0] + '.txt';
-            a.click();
-            URL.revokeObjectURL(url);
-            show('Saved!');
-          };
-          
-          btnRow.appendChild(copyBtn);
-          btnRow.appendChild(saveBtn);
-          noteBox.parentNode.insertBefore(btnRow, btnRow.nextSibling);
-        }
-        
-        try {
-          recognition.start();
-        } catch(e) {
-          statusEl.textContent = 'Error: ' + e.message;
-        }
+        startRecording();
       }
     };
-  </script>
+
+    function startRecording() {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) {
+        statusEl.textContent = 'Speech not supported - try Chrome';
+        return;
+      }
+      
+      recognition = new SR();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      
+      recognition.onstart = function() {
+        isRecording = true;
+        fullTranscript = '';
+        seconds = 0;
+        recordBtn.textContent = '⏹';
+        recordBtn.classList.add('recording');
+        statusEl.textContent = 'Recording... speak now';
+        
+        timer = setInterval(function() {
+          seconds++;
+          timerEl.textContent = fmtTime(seconds);
+        }, 1000);
+      };
+      
+      recognition.onresult = function(event) {
+        let final = '', interim = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          if (event.results[i].isFinal) {
+            final += event.results[i][0].transcript + ' ';
+          } else {
+            interim += event.results[i][0].transcript;
+          }
+        }
+        if (final) fullTranscript += final;
+        if (interim) statusEl.textContent = 'Listening: ' + interim.substring(0,30);
+      };
+      
+      recognition.onerror = function(event) {
+        statusEl.textContent = 'Error: ' + event.error;
+      };
+      
+      recognition.onend = function() {
+        if (isRecording) {
+          try { recognition.start(); } catch(e) {}
+        }
+      };
+      
+      try {
+        recognition.start();
+      } catch(e) {
+        statusEl.textContent = 'Error: ' + e.message;
+      }
+    }
+
+    function stopRecording() {
+      isRecording = false;
+      if (recognition) recognition.stop();
+      clearInterval(timer);
+      
+      recordBtn.textContent = '🎤';
+      recordBtn.classList.remove('recording');
+      
+      if (fullTranscript) {
+        noteBox.textContent = formatNote(fullTranscript);
+        statusEl.textContent = 'Done! Tap mic to record again';
+        btnRow.style.display = 'flex';
+        btnRow2.style.display = 'flex';
+      } else {
+        statusEl.textContent = 'No speech detected - try again';
+      }
+    }
+
+    function formatNote(text) {
+      const now = new Date();
+      const date = now.toLocaleDateString('en-AU', {day:'numeric', month:'long', year:'numeric'});
+      return 'Client: [Name]\nDate/Time: 11:00am – 2:00pm\nService Type: Social & Domestic Support / Transport\n\nACTIVITIES UNDERTAKEN:\n' + text + '\n\nWELLBEING/OUTCOME:\n- Client remained happy, healthy, and engaged.\n- All tasks completed.\n\nDEPARTURE:\nLeft at 2:00pm on time.';
+    }
+
+    function polishNote() {
+      statusEl.textContent = 'Polishing with AI...';
+      fetch('/api/polish', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ transcript: fullTranscript })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.polishedNote) {
+          noteBox.textContent = data.polishedNote;
+          statusEl.textContent = 'Note polished!';
+        } else {
+          statusEl.textContent = 'Error: ' + (data.error || 'Failed');
+        }
+      })
+      .catch(e => {
+        statusEl.textContent = 'Error: ' + e.message;
+      });
+    }
+
+    function copyNote() {
+      navigator.clipboard.writeText(noteBox.textContent);
+      statusEl.textContent = 'Copied to clipboard!';
+    }
+
+    function saveNote() {
+      const blob = new Blob([noteBox.textContent], {type: 'text/plain'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'note-' + new Date().toISOString().split('T')[0] + '.txt';
+      a.click();
+      URL.revokeObjectURL(url);
+      statusEl.textContent = 'Note saved!';
+    }
   </script>
 </body>
 </html>
