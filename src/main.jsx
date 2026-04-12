@@ -4,6 +4,7 @@ import App from './App'
 import './index.css'
 
 console.log('EziNotes starting...')
+alert('EziNotes JS loaded!')
 
 const root = document.getElementById('root')
 if (!root) {
