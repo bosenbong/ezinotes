@@ -26,10 +26,19 @@
     .app {
       max-width: 600px;
       margin: 0 auto;
-      background: #fff;
-      border-radius: 20px;
+      background: #fffef5;
+      border-radius: 0;
       overflow: hidden;
       box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+      border-left: 8px solid #8b4513;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #8b4513, #a0522d);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      border-bottom: 3px solid #654321;
     }
     
     .header {
@@ -45,22 +54,24 @@
     
     .tabs {
       display: flex;
-      background: #f0f0f0;
+      background: #8b4513;
     }
     
     .tab {
       flex: 1;
-      padding: 15px;
+      padding: 15px 5px;
       text-align: center;
       cursor: pointer;
       font-weight: 600;
       transition: all 0.2s;
+      color: rgba(255,255,255,0.7);
+      font-size: 12px;
     }
     
     .tab.active {
-      background: white;
-      color: #ff6b6b;
-      border-bottom: 3px solid #ff6b6b;
+      background: #fffef5;
+      color: #8b4513;
+      border-bottom: 3px solid #8b4513;
     }
     
     .section { padding: 20px; display: none; }
