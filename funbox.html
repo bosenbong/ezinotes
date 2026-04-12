@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎉 FunBox - 5 Games & More!</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap');
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'Fredoka', sans-serif;
+      background: linear-gradient(135deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #54a0ff);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
+    .app {
+      max-width: 500px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 30px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    
+    .header {
+      background: linear-gradient(90deg, #ff6b6b, #feca57);
+      color: white;
+      padding: 25px;
+      text-align: center;
+    }
+    
+    .header h1 { font-size: 32px; }
+    .header p { font-size: 16px; opacity: 0.9; }
+    
+    .menu {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      padding: 20px;
+    }
+    
+    .menu-btn {
+      padding: 25px 15px;
+      border: none;
+      border-radius: 20px;
+      font-size: 40px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .menu-btn:hover { transform: scale(1.05); }
+    .menu-btn span { font-size: 14px; font-weight: 600; }
+    
+    .btn-1 { background: #ff6b6b; color: white; }
+    .btn-2 { background: #48dbfb; color: white; }
+    .btn-3 { background: #ff9ff3; color: white; }
+    .btn-4 { background: #feca57; color: #333; }
+    .btn-5 { background: #54a0ff; color: white; }
+    .btn-6 { background: #26de81; color: white; grid-column: span 2; }
+    
+    .game-area {
+      padding: 20px;
+      display: none;
+      text-align: center;
+    }
+    
+    .game-area.active { display: block; }
+    
+    .back-btn {
+      background: #636e72;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 20px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+    
+    h2 { margin-bottom: 20px; color: #333; }
+    
+    /* Game 1: Tap Fast */
+    #tapBtn {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background: #ff6b6b;
+      border: none;
+      font-size: 24px;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    
+    #tapBtn:active { transform: scale(0.95); }
+    #tapScore { font-size: 48px; font-weight: bold; color: #ff6b6b; margin: 20px 0; }
+    
+    /* Game 2: Random Picker */
+    #wheel {
+      width: 250px;
+      height: 250px;
+      border-radius: 50%;
+      background: conic-gradient(
+        #ff6b6b 0deg 60deg,
+        #48dbfb 60deg 120deg,
+        #ff9ff3 120deg 180deg,
+        #feca57 180deg 240deg,
+        #54a0ff 240deg 300deg,
+        #26de81 300deg 360deg
+      );
+      margin: 20px auto;
+      position: relative;
+      transition: transform 3s ease-out;
+    }
+    
+    #wheel::after {
+      content: '👉';
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 40px;
+    }
+    
+    #spinResult { font-size: 24px; font-weight: bold; margin: 20px 0; min-height: 40px; }
+    
+    /* Game 3: Would You Rather */
+    #wyrcard {
+      background: linear-gradient(135deg, #ff9ff3, #feca57);
+      padding: 30px;
+      border-radius: 20px;
+      margin: 20px 0;
+    }
+    #wyroption1, #wyroption2 {
+      background: white;
+      padding: 20px;
+      margin: 10px 0;
+      border-radius: 15px;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: 600;
+    }
+    
+    /* Game 4: Compliments */
+    #compliment {
+      font-size: 28px;
+      padding: 30px;
+      background: linear-gradient(135deg, #54a0ff, #48dbfb);
+      color: white;
+      border-radius: 20px;
+      margin: 20px 0;
+    }
+    
+    /* Game 5: Fortune */
+    #fortuneBox {
+      font-size: 20px;
+      padding: 30px;
+      background: #2d3436;
+      color: #feca57;
+      border-radius: 20px;
+      margin: 20px 0;
+      min-height: 100px;
+    }
+    
+    input, textarea {
+      width: 100%;
+      padding: 15px;
+      border: 2px solid #ddd;
+      border-radius: 15px;
+      font-size: 16px;
+      margin: 10px 0;
+    }
+    
+    .action-btn {
+      background: #ff6b6b;
+      color: white;
+      padding: 15px 30px;
+      border: none;
+      border-radius: 25px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 10px 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="header">
+      <h1>🎉 FunBox</h1>
+      <p>5 Games & More!</p>
+    </div>
+    
+    <div class="menu" id="menu">
+      <button class="menu-btn btn-1" onclick="showGame('tapgame')">
+        👆<span>Tap Fast</span>
+      </button>
+      <button class="menu-btn btn-2" onclick="showGame('picker')">
+        🎲<span>Random Picker</span>
+      </button>
+      <button class="menu-btn btn-3" onclick="showGame('wyr')">
+        🤔<span>Would You Rather</span>
+      </button>
+      <button class="menu-btn btn-4" onclick="showGame('compliment')">
+        💖<span>Compliments</span>
+      </button>
+      <button class="menu-btn btn-5" onclick="showGame('fortune')">
+        🔮<span>Fortune Teller</span>
+      </button>
+      <button class="menu-btn btn-6" onclick="showGame('meme')">
+        🎭<span>Meme Maker</span>
+      </button>
+    </div>
+    
+    <!-- Tap Fast Game -->
+    <div class="game-area" id="tapgame">
+      <button class="back-btn" onclick="showMenu()">⬅ Back</button>
+      <h2>👆 Tap Fast!</h2>
+      <p>Tap as many times as you can in 5 seconds!</p>
+      <button id="tapBtn" onclick="tap()">TAP!</button>
+      <div id="tapScore">0</div>
+      <button class="action-btn" onclick="startTapGame()">▶ Start</button>
+    </div>
+    
+    <!-- Random Picker -->
+    <div class="game-area" id="picker">
+      <button class="back-btn" onclick="showMenu()">⬅ Back</button>
+      <h2>🎲 Random Picker</h2>
+      <input type="text" id="wheelOptions" placeholder="Enter options (comma separated)">
+      <p style="font-size:12px;color:#666;margin-bottom:10px;">Example: Pizza, Burgers, Sushi</p>
+      <button class="action-btn" onclick="spin()">🎰 Spin!</button>
+      <div id="wheel"></div>
+      <div id="spinResult"></div>
+    </div>
+    
+    <!-- Would You Rather -->
+    <div class="game-area" id="wyr">
+      <button class="back-btn" onclick="showMenu()">⬅ Back</button>
+      <h2>🤔 Would You Rather?</h2>
+      <div id="wyrcard">
+        <div id="wyroption1" onclick="nextWYR()">Loading...</div>
+        <p style="margin:10px 0;">OR</p>
+        <div id="wyroption2" onclick="nextWYR()">Loading...</div>
+      </div>
+      <button class="action-btn" onclick="nextWYR()">🔄 New Question</button>
+    </div>
+    
+    <!-- Compliments -->
+    <div class="game-area" id="compliment">
+      <button class="back-btn" onclick="showMenu()">⬅ Back</button>
+      <h2>💖 Daily Compliment</h2>
+      <div id="compliment">Tap button for a compliment!</div>
+      <button class="action-btn" onclick="newCompliment()">✨ New Compliment</button>
+    </div>
+    
+    <!-- Fortune Teller -->
+    <div class="game-area" id="fortune">
+      <button class="back-btn" onclick="showMenu()">⬅ Back</button>
+      <h2>🔮 Fortune Teller</h2>
+      <input type="text" id="fortuneQuestion" placeholder="Ask a yes/no question...">
+      <button class="action-btn" onclick="tellFortune()">🔮 Ask</button>
+      <div id="fortuneBox">Ask a question and tap Ask!</div>
+    </div>
+    
+    <!-- Meme Maker -->
+    <div class="game-area" id="meme">
+      <button class="back-btn" onclick="showMenu()">⬅ Back</button>
+      <h2>🎭 Meme Maker</h2>
+      <input type="text" id="topText" placeholder="Top text">
+      <input type="text" id="bottomText" placeholder="Bottom text">
+      <div style="background:#333;color:white;padding:30px;border-radius:15px;margin:20px 0;position:relative;">
+        <div id="memePreview" style="font-size:24px;font-weight:bold;text-transform:uppercase;text-align:center;">
+          <div id="previewTop" style="margin-bottom:20px;"></div>
+          <div style="font-size:80px;">😎</div>
+          <div id="previewBottom" style="margin-top:20px;"></div>
+        </div>
+      </div>
+      <button class="action-btn" onclick="updateMeme()">👀 Preview</button>
+    </div>
+  </div>
+
+  <script>
+    function showGame(id) {
+      document.getElementById('menu').style.display = 'none';
+      document.getElementById(id).classList.add('active');
+      if (id === 'wyr') nextWYR();
+      if (id === 'compliment') newCompliment();
+    }
+    
+    function showMenu() {
+      document.querySelectorAll('.game-area').forEach(g => g.classList.remove('active'));
+      document.getElementById('menu').style.display = 'grid';
+    }
+    
+    // Tap Game
+    let tapCount = 0;
+    let tapTimer = null;
+    
+    function startTapGame() {
+      tapCount = 0;
+      document.getElementById('tapScore').textContent = '0';
+      document.getElementById('tapBtn').textContent = 'TAP!';
+      document.getElementById('tapBtn').disabled = true;
+      
+      setTimeout(() => {
+        document.getElementById('tapBtn').disabled = false;
+        tapTimer = setTimeout(() => {
+          document.getElementById('tapBtn').textContent = '⏰ Time!';
+          document.getElementById('tapBtn').disabled = true;
+        }, 5000);
+      }, 1000);
+    }
+    
+    function tap() {
+      tapCount++;
+      document.getElementById('tapScore').textContent = tapCount;
+    }
+    
+    // Random Picker
+    let wheelRotation = 0;
+    
+    function spin() {
+      const options = document.getElementById('wheelOptions').value.split(',').map(s => s.trim()).filter(s => s);
+      if (options.length < 2) {
+        alert('Enter at least 2 options!');
+        return;
+      }
+      
+      const wheel = document.getElementById('wheel');
+      const extraSpins = 5;
+      const randomAngle = Math.random() * 360;
+      wheelRotation += (extraSpins * 360) + randomAngle;
+      wheel.style.transform = 'rotate(' + wheelRotation + 'deg)';
+      
+      const winningIndex = Math.floor(((wheelRotation % 360) / 360) * options.length);
+      const winner = options[winningIndex];
+      
+      setTimeout(() => {
+        document.getElementById('spinResult').textContent = '🎉 ' + winner + '!';
+      }, 3000);
+    }
+    
+    // Would You Rather
+    const wyrQuestions = [
+      { a: 'Have infinite money', b: 'Have infinite time' },
+      { a: 'Be able to fly', b: 'Be invisible' },
+      { a: 'Live in the past', b: 'Live in the future' },
+      { a: 'Be a wizard', b: 'Be a superhero' },
+      { a: 'Never use social media again', b: 'Never watch TV again' },
+      { a: 'Be famous', b: 'Be the best friend of someone famous' },
+      { a: 'Have a rewind button in life', b: 'Have a pause button' },
+      { a: 'Eat pizza forever', b: 'Eat ice cream forever' },
+      { a: 'Always be 10 minutes late', b: 'Always be 20 minutes early' },
+      { a: 'Have no phone', b: 'Have no computer' }
+    ];
+    
+    function nextWYR() {
+      const q = wyrQuestions[Math.floor(Math.random() * wyrQuestions.length)];
+      document.getElementById('wyroption1').textContent = q.a;
+      document.getElementById('wyroption2').textContent = q.b;
+    }
+    
+    // Compliments
+    const compliments = [
+      'You are absolutely amazing! 🌟',
+      'Your smile lights up the room! 💫',
+      'You are capable of amazing things! 🚀',
+      'You make the world better just by being in it! 💖',
+      'Your creativity is inspiring! 🎨',
+      'You are stronger than you know! 💪',
+      'You make people feel welcome and loved! 🥰',
+      'Your kindness makes a difference! 🌈',
+      'You are enough, just as you are! ✨',
+      'Today is going to be a great day! ☀️'
+    ];
+    
+    function newCompliment() {
+      const c = compliments[Math.floor(Math.random() * compliments.length)];
+      document.getElementById('compliment').textContent = c;
+    }
+    
+    // Fortune Teller
+    const fortunes = [
+      'Yes! Definitely! 🎉',
+      'No way, sorry! 😢',
+      'Ask again later... 🔮',
+      'Absolutely! ✅',
+      'I see good things coming! 🌟',
+      'Not looking likely... ❌',
+      'Yes, but be patient! ⏰',
+      'The universe says YES! 🚀',
+      'Probably not... 🤔',
+      'Very likely! 📈'
+    ];
+    
+    function tellFortune() {
+      const q = document.getElementById('fortuneQuestion').value.trim();
+      if (!q) {
+        alert('Ask a question first!');
+        return;
+      }
+      const f = fortunes[Math.floor(Math.random() * fortunes.length)];
+      document.getElementById('fortuneBox').textContent = f;
+    }
+    
+    // Meme Maker
+    function updateMeme() {
+      const top = document.getElementById('topText').value;
+      const bottom = document.getElementById('bottomText').value;
+      document.getElementById('previewTop').textContent = top;
+      document.getElementById('previewBottom').textContent = bottom;
+    }
+  </script>
+</body>
+</html>
