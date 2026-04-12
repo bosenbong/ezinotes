@@ -269,6 +269,7 @@
     <div class="tabs">
       <div class="tab active" onclick="switchTab('record')">🎤 New Entry</div>
       <div class="tab" onclick="switchTab('journal')">📖 My Journal</div>
+      <div class="tab" onclick="switchTab('cover')">🎨 Cover</div>
       <div class="tab" onclick="switchTab('chat')">💬 Chat AI</div>
     </div>
     
@@ -341,6 +342,84 @@
       </div>
       
       <p class="page-indicator" id="pageIndicator">Page 0 of 0</p>
+    </div>
+    
+    <!-- Cover Section -->
+    <div id="coverSection" class="section">
+      <div style="text-align:center;margin-bottom:15px;">
+        <h3>🎨 Design Your Cover</h3>
+        <p style="font-size:14px;color:#666;">Make your journal unique!</p>
+      </div>
+      
+      <div style="background:#fffaf0;border-radius:15px;padding:20px;margin-bottom:15px;box-shadow:0 5px15px rgba(0,0,0,0.1);" id="coverPreview">
+        <div id="coverContent" style="min-height:150px;position:relative;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+          <div id="coverGif" style="font-size:60px;position:absolute;top:10px;right:10px;"></div>
+          <div id="coverTitle" style="font-size:28px;font-weight:bold;text-align:center;padding:20px;">My Journal 📔</div>
+          <div id="coverName" style="font-size:16px;color:#666;text-align:center;">By Henry</div>
+        </div>
+      </div>
+      
+      <div style="margin-bottom:15px;">
+        <label style="font-weight:bold;display:block;margin-bottom:5px;">✏️ Your Name:</label>
+        <input id="coverNameInput" type="text" value="Henry" onchange="updateCover()" style="width:100%;padding:12px;border-radius:10px;border:2px solid #ddd;font-size:16px;">
+      </div>
+      
+      <div style="margin-bottom:15px;">
+        <label style="font-weight:bold;display:block;margin-bottom:5px;">🎨 Cover Color:</label>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <div onclick="setCoverColor('#ff6b6b')" style="width:40px;height:40px;background:#ff6b6b;border-radius:50%;cursor:pointer;border:3px solid transparent;"></div>
+          <div onclick="setCoverColor('#feca57')" style="width:40px;height:40px;background:#feca57;border-radius:50%;cursor:pointer;border:3px solid transparent;"></div>
+          <div onclick="setCoverColor('#4ecdc4')" style="width:40px;height:40px;background:#4ecdc4;border-radius:50%;cursor:pointer;border:3px solid transparent;"></div>
+          <div onclick="setCoverColor('#a55eea')" style="width:40px;height:40px;background:#a55eea;border-radius:50%;cursor:pointer;border:3px solid transparent;"></div>
+          <div onclick="setCoverColor('#26de81')" style="width:40px;height:40px;background:#26de81;border-radius:50%;cursor:pointer;border:3px solid transparent;"></div>
+          <div onclick="setCoverColor('#ffeaa7')" style="width:40px;height:40px;background:#ffeaa7;border-radius:50%;cursor:pointer;border:3px solid transparent;"></div>
+          <div onclick="setCoverColor('#636e72')" style="width:40px;height:40px;background:#636e72;border-radius:50%;cursor:pointer;border:3px solid transparent;"></div>
+          <div onclick="setCoverColor('#2d3436')" style="width:40px;height:40px;background:#2d3436;border-radius:50%;cursor:pointer;border:3px solid transparent;"></div>
+        </div>
+      </div>
+      
+      <div style="margin-bottom:15px;">
+        <label style="font-weight:bold;display:block;margin-bottom:5px;">✨ Add a Sticker/GIF:</label>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <span onclick="setCoverGif('🔥')" style="font-size:30px;cursor:pointer;">🔥</span>
+          <span onclick="setCoverGif('⭐')" style="font-size:30px;cursor:pointer;">⭐</span>
+          <span onclick="setCoverGif('🌟')" style="font-size:30px;cursor:pointer;">🌟</span>
+          <span onclick="setCoverGif('💜')" style="font-size:30px;cursor:pointer;">💜</span>
+          <span onclick="setCoverGif('🎮')" style="font-size:30px;cursor:pointer;">🎮</span>
+          <span onclick="setCoverGif('🎵')" style="font-size:30px;cursor:pointer;">🎵</span>
+          <span onclick="setCoverGif('⚡')" style="font-size:30px;cursor:pointer;">⚡</span>
+          <span onclick="setCoverGif('🌈')" style="font-size:30px;cursor:pointer;">🌈</span>
+          <span onclick="setCoverGif('💎')" style="font-size:30px;cursor:pointer;">💎</span>
+          <span onclick="setCoverGif('🎉')" style="font-size:30px;cursor:pointer;">🎉</span>
+          <span onclick="setCoverGif('🌸')" style="font-size:30px;cursor:pointer;">🌸</span>
+          <span onclick="setCoverGif('🍕')" style="font-size:30px;cursor:pointer;">🍕</span>
+          <span onclick="setCoverGif('')" style="font-size:20px;cursor:pointer;padding:5px;border:1px solid #ddd;border-radius:5px;">❌ Clear</span>
+        </div>
+      </div>
+      
+      <div style="margin-bottom:15px;">
+        <label style="font-weight:bold;display:block;margin-bottom:5px;">✏️ Draw on Cover:</label>
+        <canvas id="drawCanvas" width="300" height="150" style="border:2px solid #ddd;border-radius:10px;cursor:crosshair;background:white;"></canvas>
+        <div style="display:flex;gap:10px;margin-top:10px;">
+          <button onclick="setDrawColor('#000')" style="width:30px;height:30px;background:#000;border-radius:50%;border:none;cursor:pointer;"></button>
+          <button onclick="setDrawColor('#ff6b6b')" style="width:30px;height:30px;background:#ff6b6b;border-radius:50%;border:none;cursor:pointer;"></button>
+          <button onclick="setDrawColor('#4ecdc4')" style="width:30px;height:30px;background:#4ecdc4;border-radius:50%;border:none;cursor:pointer;"></button>
+          <button onclick="setDrawColor('#a55eea')" style="width:30px;height:30px;background:#a55eea;border-radius:50%;border:none;cursor:pointer;"></button>
+          <button onclick="setDrawColor('#ffeaa7')" style="width:30px;height:30px;background:#ffeaa7;border-radius:50%;border:none;cursor:pointer;"></button>
+          <button onclick="clearDraw()" style="padding:5px 10px;background:#ddd;border:none;border-radius:5px;cursor:pointer;">🗑️ Clear</button>
+        </div>
+      </div>
+      
+      <div style="margin-bottom:15px;">
+        <label style="font-weight:bold;display:block;margin-bottom:5px;">🔤 Font Style:</label>
+        <select id="fontSelect" onchange="setFont(this.value)" style="width:100%;padding:12px;border-radius:10px;border:2px solid #ddd;font-size:16px;">
+          <option value="'Caveat', cursive">Caveat (Handwriting)</option>
+          <option value="'Poppins', sans-serif">Poppins (Modern)</option>
+          <option value="Georgia, serif">Georgia (Classic)</option>
+          <option value="'Courier New', monospace">Courier (Typewriter)</option>
+          <option value="'Comic Sans MS', cursive">Comic Sans (Fun)</option>
+        </select>
+      </div>
     </div>
     
     <!-- Chat Section -->
@@ -417,8 +496,12 @@
         document.getElementById('journalSection').classList.add('active');
         updateJournalView();
       } else if (tab === 'chat') {
-        document.querySelectorAll('.tab')[2].classList.add('active');
+        document.querySelectorAll('.tab')[3].classList.add('active');
         document.getElementById('chatSection').classList.add('active');
+      } else if (tab === 'cover') {
+        document.querySelectorAll('.tab')[2].classList.add('active');
+        document.getElementById('coverSection').classList.add('active');
+        initDrawCanvas();
       }
     }
     
@@ -783,6 +866,97 @@
     function clearChat() {
       chatHistory = [];
       document.getElementById('chatMessages').innerHTML = '<div style="margin-bottom:10px;"><span style="background:#667eea;color:white;padding:10px 15px;border-radius:15px 15px 15px 0;display:inline-block;">Hey! I\'m here to help with homework or anything. What do you want to talk about? 📚</span></div>';
+    }
+    
+    // Cover customization
+    let coverColor = '#ff6b6b';
+    let coverGif = '';
+    let currentDrawColor = '#000';
+    let drawCtx = null;
+    let isDrawing = false;
+    
+    function updateCover() {
+      const name = document.getElementById('coverNameInput').value || 'Henry';
+      document.getElementById('coverName').textContent = 'By ' + name;
+    }
+    
+    function setCoverColor(color) {
+      coverColor = color;
+      document.getElementById('coverPreview').style.background = color;
+    }
+    
+    function setCoverGif(gif) {
+      coverGif = gif;
+      document.getElementById('coverGif').textContent = gif;
+    }
+    
+    function setFont(font) {
+      document.getElementById('coverTitle').style.fontFamily = font;
+      document.getElementById('coverName').style.fontFamily = font;
+    }
+    
+    function initDrawCanvas() {
+      const canvas = document.getElementById('drawCanvas');
+      if (!canvas) return;
+      
+      drawCtx = canvas.getContext('2d');
+      drawCtx.lineWidth = 3;
+      drawCtx.lineCap = 'round';
+      
+      canvas.addEventListener('mousedown', startDraw);
+      canvas.addEventListener('mousemove', draw);
+      canvas.addEventListener('mouseup', stopDraw);
+      canvas.addEventListener('mouseout', stopDraw);
+      
+      // Touch support
+      canvas.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const rect = canvas.getBoundingClientRect();
+        isDrawing = true;
+        drawCtx.beginPath();
+        drawCtx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+      });
+      
+      canvas.addEventListener('touchmove', function(e) {
+        e.preventDefault();
+        if (!isDrawing) return;
+        const touch = e.touches[0];
+        const rect = canvas.getBoundingClientRect();
+        drawCtx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+        drawCtx.stroke();
+      });
+      
+      canvas.addEventListener('touchend', stopDraw);
+    }
+    
+    function startDraw(e) {
+      isDrawing = true;
+      const rect = e.target.getBoundingClientRect();
+      drawCtx.beginPath();
+      drawCtx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+    }
+    
+    function draw(e) {
+      if (!isDrawing) return;
+      const rect = e.target.getBoundingClientRect();
+      drawCtx.strokeStyle = currentDrawColor;
+      drawCtx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+      drawCtx.stroke();
+    }
+    
+    function stopDraw() {
+      isDrawing = false;
+    }
+    
+    function setDrawColor(color) {
+      currentDrawColor = color;
+    }
+    
+    function clearDraw() {
+      if (drawCtx) {
+        drawCtx.clearRect(0, 0, 300, 150);
+      }
     }
   </script>
 </body>
