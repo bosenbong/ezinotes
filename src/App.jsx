@@ -28,7 +28,7 @@ export default function App() {
     }
     
     const recognition = new SpeechRecognition()
-    recognition.continuous = false
+    recognition.continuous = true
     recognition.interimResults = true
     recognitionRef.current = recognition
     
@@ -73,28 +73,21 @@ export default function App() {
     }
     
     recognition.onend = () => {
-      // If still recording and we have a transcript, auto-restart to keep capturing
-      // This handles continuous = false mode where it stops after each sentence
-      if (isRecording && recognitionRef.current) {
-        try {
-          recognitionRef.current.start()
-        } catch(e) {
-          // Failed to restart - stop cleanly
-          setIsRecording(false)
-          clearInterval(timerRef.current)
-          if (transcript) {
-            setStatus('Done!')
-            show('Note ready!')
-          }
-        }
-      } else {
-        // User stopped it
+      // Only process if we intentionally stopped recording
+      if (!isRecording) {
         clearInterval(timerRef.current)
+        return
+      }
+      // If recognition ended unexpectedly while still recording, try restart once
+      try {
+        recognitionRef.current.start()
+      } catch(e) {
+        // Failed - stop cleanly
+        clearInterval(timerRef.current)
+        setIsRecording(false)
         if (transcript) {
           setStatus('Done!')
           show('Note ready!')
-        } else {
-          setStatus('Recording stopped - tap mic to try again')
         }
       }
     }
