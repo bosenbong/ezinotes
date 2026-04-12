@@ -269,6 +269,7 @@
     <div class="tabs">
       <div class="tab active" onclick="switchTab('record')">🎤 New Entry</div>
       <div class="tab" onclick="switchTab('journal')">📖 My Journal</div>
+      <div class="tab" onclick="switchTab('chat')">💬 Chat AI</div>
     </div>
     
     <!-- Record Section -->
@@ -341,6 +342,27 @@
       
       <p class="page-indicator" id="pageIndicator">Page 0 of 0</p>
     </div>
+    
+    <!-- Chat Section -->
+    <div id="chatSection" class="section">
+      <div style="text-align:center;margin-bottom:15px;">
+        <h3>💬 Chat with AI</h3>
+        <p style="font-size:14px;color:#666;">Ask me anything! Homework, help, or just chat.</p>
+      </div>
+      
+      <div id="chatMessages" style="height:250px;overflow-y:auto;background:#f5f5f5;border-radius:15px;padding:15px;margin-bottom:15px;">
+        <div style="margin-bottom:10px;">
+          <span style="background:#667eea;color:white;padding:10px 15px;border-radius:15px 15px 15px 0;display:inline-block;">Hey! I'm here to help with homework or anything. What do you want to talk about? 📚</span>
+        </div>
+      </div>
+      
+      <div style="display:flex;gap:10px;">
+        <input id="chatInput" type="text" placeholder="Type your message..." style="flex:1;padding:15px;border-radius:25px;border:2px solid #ddd;outline:none;font-size:16px;" onkeypress="if(event.key==='Enter')sendChat()">
+        <button onclick="sendChat()" style="padding:15px 25px;background:#667eea;color:white;border:none;border-radius:25px;font-weight:600;cursor:pointer;">Send</button>
+      </div>
+      
+      <button onclick="clearChat()" style="margin-top:15px;padding:10px 20px;background:#ddd;border:none;border-radius:10px;cursor:pointer;">🗑️ Clear Chat</button>
+    </div>
   </div>
 
   <script>
@@ -388,12 +410,15 @@
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
       
       if (tab === 'record') {
-        document.querySelector('.tab:first-child').classList.add('active');
+        document.querySelectorAll('.tab')[0].classList.add('active');
         document.getElementById('recordSection').classList.add('active');
-      } else {
-        document.querySelector('.tab:last-child').classList.add('active');
+      } else if (tab === 'journal') {
+        document.querySelectorAll('.tab')[1].classList.add('active');
         document.getElementById('journalSection').classList.add('active');
         updateJournalView();
+      } else if (tab === 'chat') {
+        document.querySelectorAll('.tab')[2].classList.add('active');
+        document.getElementById('chatSection').classList.add('active');
       }
     }
     
@@ -490,31 +515,35 @@
     function addProperPunctuation(text) {
       let result = text.trim();
       
-      // Capitalize "i" to "I"
+      // Fix "i" to "I" - standalone
       result = result.replace(/\bi\b/g, 'I');
+      // Fix "i'm" to "I'm"
+      result = result.replace(/i'm/gi, "I'm");
+      // Fix "i'll" to "I'll"
+      result = result.replace(/i'll/gi, "I'll");
+      // Fix "i've" to "I've"
+      result = result.replace(/i've/gi, "I've");
+      // Fix "i'd" to "I'd"
+      result = result.replace(/i'd/gi, "I'd");
       
-      // Capitalize first letter
-      result = result.charAt(0).toUpperCase() + result.slice(1);
+      // Split into sentences and capitalize each one
+      let sentences = result.split(/([.!?]+)/);
+      let fixedResult = '';
+      for (let i = 0; i < sentences.length; i++) {
+        let s = sentences[i].trim();
+        if (s.length > 0) {
+          // Capitalize first letter of sentence
+          s = s.charAt(0).toUpperCase() + s.slice(1);
+          fixedResult += s + (sentences[i].match(/[.!?]/) || '');
+        } else {
+          fixedResult += sentences[i];
+        }
+      }
+      result = fixedResult;
       
       // Format money ($10, 10 dollars -> $10)
       result = result.replace(/(\d+)\s*dollars?/gi, '$$$1');
       result = result.replace(/(\d+)\s*bucks?/gi, '$$$1');
-      
-      // Add commas - before "and" when it joins two complete thoughts
-      // Pattern: "something, and something" or "something but something"
-      result = result.replace(/(\w+)\s+and\s+I\s+/g, '$1, and I ');
-      result = result.replace(/(\w+)\s+and\s+(\w+ing)/g, '$1, and $2');
-      
-      // Add comma before "because" if followed by a clause
-      result = result.replace(/\s+because\s+(i|we|they|he|she|my|their)/gi, ', because $1');
-      
-      // Add comma before "while" 
-      result = result.replace(/\s+while\s+(i|we|they|he|she)/gi, ', while $1');
-      
-      // Add period if no ending punctuation
-      if (!result.match(/[.!?]$/)) {
-        result += '.';
-      }
       
       // Clean up multiple spaces
       result = result.replace(/\s+/g, ' ');
@@ -678,6 +707,66 @@
         currentPage++;
         updateJournalView();
       }
+    }
+    
+    // Chat functions
+    let chatHistory = [];
+    
+    async function sendChat() {
+      const input = document.getElementById('chatInput');
+      const message = input.value.trim();
+      if (!message) return;
+      
+      // Add user message
+      addChatMessage(message, 'user');
+      chatHistory.push({ role: 'user', content: message });
+      input.value = '';
+      
+      // Show loading
+      const loadingDiv = document.createElement('div');
+      loadingDiv.id = 'chatLoading';
+      loadingDiv.innerHTML = '<span style="background:#667eea;color:white;padding:10px 15px;border-radius:15px 15px 15px 0;display:inline-block;">Thinking... 💭</span>';
+      document.getElementById('chatMessages').appendChild(loadingDiv);
+      document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+      
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ message: message, history: chatHistory })
+        });
+        const data = await res.json();
+        
+        document.getElementById('chatLoading').remove();
+        
+        if (data.response) {
+          addChatMessage(data.response, 'ai');
+          chatHistory.push({ role: 'assistant', content: data.response });
+        }
+      } catch(e) {
+        document.getElementById('chatLoading').remove();
+        addChatMessage("Oops! Something went wrong. Try again!", 'ai');
+      }
+    }
+    
+    function addChatMessage(text, who) {
+      const container = document.getElementById('chatMessages');
+      const div = document.createElement('div');
+      div.style.marginBottom = '10px';
+      
+      if (who === 'user') {
+        div.innerHTML = '<span style="background:#10b981;color:white;padding:10px 15px;border-radius:15px 15px 0 15px;display:inline-block;float:right;">' + text + '</span><div style="clear:both;"></div>';
+      } else {
+        div.innerHTML = '<span style="background:#667eea;color:white;padding:10px 15px;border-radius:15px 15px 15px 0;display:inline-block;">' + text + '</span>';
+      }
+      
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+    }
+    
+    function clearChat() {
+      chatHistory = [];
+      document.getElementById('chatMessages').innerHTML = '<div style="margin-bottom:10px;"><span style="background:#667eea;color:white;padding:10px 15px;border-radius:15px 15px 15px 0;display:inline-block;">Hey! I\'m here to help with homework or anything. What do you want to talk about? 📚</span></div>';
     }
   </script>
 </body>
