@@ -536,10 +536,26 @@
         return;
       }
       
+      // Check microphone permission first
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(function(stream) {
+          // Mic allowed, proceed
+          stream.getTracks().forEach(track => track.stop());
+          startSpeechRecognition();
+        })
+        .catch(function(err) {
+          document.getElementById('status').textContent = 'Mic permission needed!';
+          alert('Please allow microphone access to use voice recording.');
+        });
+    }
+    
+    function startSpeechRecognition() {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       recognition = new SR();
-      recognition.continuous = false;
+      recognition.continuous = true;
       recognition.interimResults = true;
-      recognition.lang = 'en-AU';
+      recognition.lang = 'en-US';
+      recognition.maxAlternatives = 1;
       
       recognition.onstart = function() {
         isRecording = true;
