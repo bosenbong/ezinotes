@@ -44,7 +44,7 @@ USE THIS EXACT STRUCTURE:
 
 [Participant Initials]
 [Date]
-[Shift Time]
+[Shift Time - e.g., "6am-4pm" or just write approximate]
 
 [TIMESTAMP]
 [Detailed description of what happened]
