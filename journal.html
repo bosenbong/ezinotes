@@ -488,22 +488,33 @@
     }
     
     function addProperPunctuation(text) {
-      // Add punctuation where missing
       let result = text.trim();
+      
+      // Capitalize "i" to "I"
+      result = result.replace(/\bi\b/g, 'I');
       
       // Capitalize first letter
       result = result.charAt(0).toUpperCase() + result.slice(1);
+      
+      // Format money ($10, 10 dollars -> $10)
+      result = result.replace(/(\d+)\s*dollars?/gi, '$$$1');
+      result = result.replace(/(\d+)\s*bucks?/gi, '$$$1');
+      
+      // Add commas - before "and" when it joins two complete thoughts
+      // Pattern: "something, and something" or "something but something"
+      result = result.replace(/(\w+)\s+and\s+I\s+/g, '$1, and I ');
+      result = result.replace(/(\w+)\s+and\s+(\w+ing)/g, '$1, and $2');
+      
+      // Add comma before "because" if followed by a clause
+      result = result.replace(/\s+because\s+(i|we|they|he|she|my|their)/gi, ', because $1');
+      
+      // Add comma before "while" 
+      result = result.replace(/\s+while\s+(i|we|they|he|she)/gi, ', while $1');
       
       // Add period if no ending punctuation
       if (!result.match(/[.!?]$/)) {
         result += '.';
       }
-      
-      // Fix spacing before punctuation
-      result = result.replace(/\s+([.!?])/g, '$1');
-      
-      // Add periods after lowercase letters that look like sentence endings
-      result = result.replace(/([a-z])\s+([A-Z])/g, '$1. $2');
       
       // Clean up multiple spaces
       result = result.replace(/\s+/g, ' ');
