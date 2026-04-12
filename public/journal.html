@@ -132,6 +132,7 @@
       recognition.continuous = true;
       recognition.interimResults = true;
       recognition.lang = 'en-US';
+      recognition.maxAlternatives = 1;
       
       recognition.onstart = function() {
         isRecording = true;
@@ -139,7 +140,7 @@
         seconds = 0;
         document.getElementById('recordBtn').classList.add('recording');
         document.getElementById('recordBtn').textContent = '⏹';
-        document.getElementById('status').textContent = 'Listening...';
+        document.getElementById('status').textContent = 'Listening... Talk now!';
         timer = setInterval(() => {
           seconds++;
           document.getElementById('timer').textContent = Math.floor(seconds/60) + ':' + String(seconds%60).padStart(2,'0');
@@ -152,9 +153,21 @@
         }
       };
       
-      recognition.onend = function() { if (isRecording) try { recognition.start(); } catch(e) {} };
+      recognition.onerror = function(event) {
+        document.getElementById('status').textContent = 'Error: ' + event.error;
+      };
       
-      try { recognition.start(); } catch(e) { alert(e.message); }
+      recognition.onend = function() { 
+        if (isRecording) {
+          try { recognition.start(); } catch(e) {}
+        }
+      };
+      
+      try { 
+        recognition.start(); 
+      } catch(e) { 
+        document.getElementById('status').textContent = 'Error: ' + e.message;
+      }
     }
     
     function stopRecording() {
