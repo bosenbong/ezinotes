@@ -574,10 +574,22 @@
       recognition.onresult = function(event) {
         let final = '', interim = '';
         for (let i = event.resultIndex; i < event.results.length; i++) {
+          const t = event.results[i][0].transcript.trim();
+          if (!t) continue;
           if (event.results[i].isFinal) {
-            final += event.results[i][0].transcript + ' ';
+            // Deduplicate repeated words
+            const words = t.split(' ');
+            const deduped = [];
+            let lastWord = '';
+            for (const w of words) {
+              if (w !== lastWord) {
+                deduped.push(w);
+                lastWord = w;
+              }
+            }
+            final += deduped.join(' ') + ' ';
           } else {
-            interim += event.results[i][0].transcript;
+            interim += t;
           }
         }
         if (final) rawTranscript += final;
