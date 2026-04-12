@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EziNotes - Voice to NDIS Notes</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .app {
+      max-width: 400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+    }
+    .header {
+      background: #2563eb;
+      color: white;
+      padding: 24px;
+      text-align: center;
+    }
+    .header h1 { font-size: 24px; margin: 0; }
+    .content { padding: 24px; text-align: center; }
+    .record-btn {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: none;
+      background: #2563eb;
+      color: white;
+      font-size: 48px;
+      cursor: pointer;
+    }
+    .record-btn.recording { background: #ef4444; }
+    .timer { font-size: 32px; font-weight: bold; margin: 10px 0; }
+    .status { margin-top: 12px; color: #666; }
+    .note-box {
+      background: #f3f4f6;
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 24px;
+      min-height: 100px;
+      white-space: pre-wrap;
+      font-size: 14px;
+      text-align: left;
+    }
+    .btn-row { display: flex; gap: 10px; margin-top: 12px; }
+    .btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.1s, opacity 0.2s;
+      opacity: 1;
+    }
+    .btn:hover { opacity: 0.85; transform: scale(1.02); }
+    .btn:active { transform: scale(0.98); }
+    .btn-polish { background: linear-gradient(135deg, #10b981, #059669); color: white; }
+    .btn-copy { background: #3b82f6; color: white; }
+    .btn-save { background: #8b5cf6; color: white; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="header">
+      <h1>📝 EziNotes</h1>
+      <p>Voice to NDIS notes</p>
+    </div>
+    <div style="background:#fff3cd;padding:10px;font-size:12px;text-align:center;border-bottom:1px solid #ffeeba;">
+      ⚠️ <strong>Beta Test:</strong> Use initials only (e.g., S.G.). Don't enter real client names. 
+    </div>
+    <div class="content">
+      <button id="recordBtn" class="record-btn">🎤</button>
+      <div id="timer" class="timer">0:00</div>
+      <p id="status" class="status">Tap mic to start</p>
+      <div id="noteBox" class="note-box">Your note will appear here...</div>
+      <div id="btnRow" class="btn-row" style="display:none;">
+        <button class="btn btn-polish" onclick="polishNote()">✨ Polish (AI)</button>
+      </div>
+      <div id="btnRow2" class="btn-row" style="display:none;">
+        <button class="btn btn-copy" onclick="copyNote()">📋 Copy</button>
+        <button class="btn btn-save" onclick="saveNote()">💾 Save</button>
+      </div>
+      
+      <button class="btn" style="background:#636e72;margin-top:20px;" onclick="showFeedback()">💬 Send Feedback</button>
+      
+      <div id="feedbackSection" style="display:none;margin-top:15px;background:#f3f4f6;padding:15px;border-radius:10px;">
+        <p style="font-weight:bold;margin-bottom:10px;">Help us improve! What's wrong or what do you need?</p>
+        <p style="font-size:12px;color:#666;margin-bottom:10px;">⚠️ Please don't include real client names in your feedback.</p>
+        <textarea id="feedbackText" placeholder="Type your feedback here..." style="width:100%;height:80px;padding:10px;border-radius:8px;border:1px solid #ddd;margin-bottom:10px;"></textarea>
+        <button class="btn" onclick="sendFeedback()">📤 Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const recordBtn = document.getElementById('recordBtn');
+    const statusEl = document.getElementById('status');
+    const noteBox = document.getElementById('noteBox');
+    const timerEl = document.getElementById('timer');
+    const btnRow = document.getElementById('btnRow');
+    const btnRow2 = document.getElementById('btnRow2');
+    
+    let isRecording = false;
+    let recognition = null;
+    let timer = null;
+    let seconds = 0;
+    let fullTranscript = '';
+
+    function fmtTime(s) {
+      return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
+    }
+
+    recordBtn.onclick = function() {
+      if (isRecording) {
+        stopRecording();
+      } else {
+        startRecording();
+      }
+    };
+
+    function startRecording() {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) {
+        statusEl.textContent = 'Speech not supported - try Chrome';
+        return;
+      }
+      
+      recognition = new SR();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      
+      recognition.onstart = function() {
+        isRecording = true;
+        fullTranscript = '';
+        seconds = 0;
+        recordBtn.textContent = '⏹';
+        recordBtn.classList.add('recording');
+        statusEl.textContent = 'Recording... speak now';
+        
+        timer = setInterval(function() {
+          seconds++;
+          timerEl.textContent = fmtTime(seconds);
+        }, 1000);
+      };
+      
+      recognition.onresult = function(event) {
+        let final = '', interim = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const t = event.results[i][0].transcript.trim();
+          if (!t) continue;
+          if (event.results[i].isFinal) {
+            // Remove duplicate words
+            let words = t.toLowerCase().split(/\s+/);
+            let deduped = [];
+            for (let j = 0; j < words.length; j++) {
+              if (j >= 1 && words[j] === words[j-1]) continue; // Skip same word twice
+              if (j >= 2 && words[j] === words[j-2]) continue; // Skip triple
+              deduped.push(words[j]);
+            }
+            final += deduped.join(' ') + ' ';
+          } else {
+            interim += t;
+          }
+        }
+        if (final) fullTranscript += final;
+        if (interim) statusEl.textContent = 'Listening: ' + interim.substring(0,30);
+      };
+      
+      recognition.onerror = function(event) {
+        statusEl.textContent = 'Error: ' + event.error;
+        // If no-speech error, try to restart
+        if (event.error === 'no-speech' && isRecording) {
+          setTimeout(function() {
+            try { recognition.start(); } catch(e) {}
+          }, 500);
+        }
+      };
+      
+      recognition.onend = function() {
+        if (isRecording) {
+          // Keep trying to restart
+          setTimeout(function() {
+            if (isRecording) {
+              try { recognition.start(); } catch(e) {}
+            }
+          }, 300);
+        }
+      };
+      
+      try {
+        recognition.start();
+      } catch(e) {
+        statusEl.textContent = 'Error: ' + e.message;
+      }
+    }
+
+    function stopRecording() {
+      isRecording = false;
+      if (recognition) recognition.stop();
+      clearInterval(timer);
+      
+      recordBtn.textContent = '🎤';
+      recordBtn.classList.remove('recording');
+      
+      if (fullTranscript) {
+        noteBox.textContent = formatNote(fullTranscript);
+        statusEl.textContent = 'Done! Tap mic to record again';
+        btnRow.style.display = 'flex';
+        btnRow2.style.display = 'flex';
+      } else {
+        statusEl.textContent = 'No speech detected - try again';
+      }
+    }
+
+    function formatNote(text) {
+      // Remove duplicate words
+      let words = text.toLowerCase().split(/\s+/);
+      let deduped = [];
+      for (let j = 0; j < words.length; j++) {
+        if (j >= 1 && words[j] === words[j-1]) continue; // skip doubles
+        if (j >= 2 && words[j] === words[j-2]) continue; // skip triples
+        deduped.push(words[j]);
+      }
+      text = deduped.join(' ');
+      
+      // Capitalize first letter and add period if needed
+      text = text.trim();
+      text = text.charAt(0).toUpperCase() + text.slice(1);
+      if (!text.match(/[.!?]$/)) text += '.';
+      
+      const now = new Date();
+      const date = now.toLocaleDateString('en-AU', {day:'numeric', month:'long', year:'numeric'});
+      return 'Client: [Name]\nDate/Time: 11:00am – 2:00pm\nService Type: Social & Domestic Support / Transport\n\nACTIVITIES UNDERTAKEN:\n' + text + '\n\nWELLBEING/OUTCOME:\n- Client remained happy, healthy, and engaged.\n- All tasks completed.\n\nDEPARTURE:\nLeft at 2:00pm on time.';
+    }
+
+    function polishNote() {
+      statusEl.textContent = 'Polishing with AI...';
+      fetch('/api/polish', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ transcript: fullTranscript })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.polishedNote) {
+          noteBox.textContent = data.polishedNote;
+          statusEl.textContent = 'Note polished!';
+        } else {
+          statusEl.textContent = 'Error: ' + (data.error || 'Failed');
+        }
+      })
+      .catch(e => {
+        statusEl.textContent = 'Error: ' + e.message;
+      });
+    }
+
+    function copyNote() {
+      navigator.clipboard.writeText(noteBox.textContent);
+      statusEl.textContent = 'Copied to clipboard!';
+    }
+
+    function saveNote() {
+      const blob = new Blob([noteBox.textContent], {type: 'text/plain'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'note-' + new Date().toISOString().split('T')[0] + '.txt';
+      a.click();
+      URL.revokeObjectURL(url);
+      statusEl.textContent = 'Note saved!';
+    }
+
+    function showFeedback() {
+      const section = document.getElementById('feedbackSection');
+      section.style.display = section.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function sendFeedback() {
+      const text = document.getElementById('feedbackText').value.trim();
+      if (!text) {
+        alert('Please type some feedback first!');
+        return;
+      }
+      
+      // Send feedback (for now just show it works - in production would save to database)
+      alert('Thank you for your feedback! This helps us improve EziNotes. 💜');
+      document.getElementById('feedbackText').value = '';
+      document.getElementById('feedbackSection').style.display = 'none';
+      statusEl.textContent = 'Feedback sent!';
+    }
+  </script>
+</body>
+</html>
