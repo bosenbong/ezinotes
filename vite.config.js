@@ -6,12 +6,7 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        main: './index.html',
-        game: './game.html',
-        rage: './rage.html',
-        fever: './fever.html',
-        fever3d: './fever3d.html',
-        feverBuild: './fever-build.html'
+        main: './index.html'
       }
     }
   },
