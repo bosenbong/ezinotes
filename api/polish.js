@@ -34,7 +34,7 @@ export async function POST(request) {
 
 IMPORTANT RULES:
 - Use participant initials or pseudonym (e.g., "S.G.", "Participant") - NEVER use real names for privacy (Australia NDIS)
-- Include TIMESTAMPS for each event (e.g., "at 9:30am", "at 2pm")
+- ONLY include timestamps IF the user explicitly mentions a time (e.g., "at 9am", "around lunch time"). DO NOT invent times.
 - Use past tense, professional language
 - Be detailed and specific about what happened at each time
 - Include observations about mood, health, mobility, medications

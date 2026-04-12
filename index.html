@@ -60,7 +60,11 @@
       font-size: 14px;
       font-weight: 600;
       cursor: pointer;
+      transition: transform 0.1s, opacity 0.2s;
+      opacity: 1;
     }
+    .btn:hover { opacity: 0.85; transform: scale(1.02); }
+    .btn:active { transform: scale(0.98); }
     .btn-polish { background: linear-gradient(135deg, #10b981, #059669); color: white; }
     .btn-copy { background: #3b82f6; color: white; }
     .btn-save { background: #8b5cf6; color: white; }
