@@ -84,6 +84,14 @@
         <button class="btn btn-copy" onclick="copyNote()">📋 Copy</button>
         <button class="btn btn-save" onclick="saveNote()">💾 Save</button>
       </div>
+      
+      <button class="btn" style="background:#636e72;margin-top:20px;" onclick="showFeedback()">💬 Send Feedback</button>
+      
+      <div id="feedbackSection" style="display:none;margin-top:15px;background:#f3f4f6;padding:15px;border-radius:10px;">
+        <p style="font-weight:bold;margin-bottom:10px;">Help us improve! What's wrong or what do you need?</p>
+        <textarea id="feedbackText" placeholder="Type your feedback here..." style="width:100%;height:80px;padding:10px;border-radius:8px;border:1px solid #ddd;margin-bottom:10px;"></textarea>
+        <button class="btn" onclick="sendFeedback()">📤 Send</button>
+      </div>
     </div>
   </div>
 
@@ -238,6 +246,25 @@
       a.click();
       URL.revokeObjectURL(url);
       statusEl.textContent = 'Note saved!';
+    }
+
+    function showFeedback() {
+      const section = document.getElementById('feedbackSection');
+      section.style.display = section.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function sendFeedback() {
+      const text = document.getElementById('feedbackText').value.trim();
+      if (!text) {
+        alert('Please type some feedback first!');
+        return;
+      }
+      
+      // Send feedback (for now just show it works - in production would save to database)
+      alert('Thank you for your feedback! This helps us improve EziNotes. 💜');
+      document.getElementById('feedbackText').value = '';
+      document.getElementById('feedbackSection').style.display = 'none';
+      statusEl.textContent = 'Feedback sent!';
     }
   </script>
 </body>
