@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voice Journal 📱</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      min-height: 100vh;
+      padding: 20px;
+      transition: background 0.5s;
+    }
+    
+    /* Themes */
+    .theme-space { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); }
+    .theme-beach { background: linear-gradient(135deg, #00d2ff, #3a7bd5); }
+    .theme-gaming { background: linear-gradient(135deg, #1a1a2e, #16213e); }
+    .theme-anime { background: linear-gradient(135deg, #ff9a9e, #fecfef); }
+    .theme-neon { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); }
+    
+    .app {
+      max-width: 500px;
+      margin: 0 auto;
+      background: rgba(255,255,255,0.95);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+    }
+    
+    .header {
+      background: linear-gradient(90deg, #ff6b6b, #feca57);
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    
+    .header h1 { font-size: 24px; }
+    .streak { font-size: 14px; margin-top: 5px; }
+    .streak span { color: #ff6b6b; }
+    
+    .section { padding: 20px; }
+    
+    .mood-picker {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    
+    .mood {
+      font-size: 32px;
+      padding: 10px;
+      background: #f0f0f0;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .mood:hover { transform: scale(1.2); }
+    .mood.selected { background: #ffe66d; transform: scale(1.2); }
+    
+    .prompt-box {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      padding: 15px;
+      border-radius: 15px;
+      text-align: center;
+      font-size: 18px;
+      margin: 15px 0;
+      cursor: pointer;
+    }
+    
+    .record-btn {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, #ff6b6b, #feca57);
+      font-size: 40px;
+      cursor: pointer;
+      display: block;
+      margin: 20px auto;
+      transition: all 0.3s;
+    }
+    
+    .record-btn.recording {
+      animation: pulse 0.5s infinite;
+      background: #ff4757;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    
+    .timer { text-align: center; font-size: 24px; font-weight: bold; margin: 10px 0; }
+    
+    .entry {
+      background: #f8f9fa;
+      border-radius: 15px;
+      padding: 15px;
+      margin: 15px 0;
+      white-space: pre-wrap;
+    }
+    
+    .entry .mood { font-size: 20px; }
+    .entry .date { color: #666; font-size: 12px; }
+    .entry .ai-reaction { 
+      background: linear-gradient(90deg, #a8edea, #fed6e3); 
+      padding: 10px; 
+      border-radius: 10px;
+      margin-top: 10px;
+      font-style: italic;
+    }
+    
+    .controls { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+    
+    .btn {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn:hover { transform: translateY(-2px); }
+    .btn-theme { background: #667eea; color: white; }
+    .btn-sound { background: #feca57; color: #333; }
+    .btn-export { background: #ff6b6b; color: white; }
+    .btn-save { background: #10b981; color: white; }
+    .btn-clear { background: #666; color: white; }
+    
+    .themes { display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; flex-wrap: wrap; }
+    .theme-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 2px solid white;
+      cursor: pointer;
+    }
+    
+    .history { max-height: 300px; overflow-y: auto; }
+    
+    .sound-fx {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 100px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .sound-fx.show { opacity: 1; }
+  </style>
+</head>
+<body class="theme-gaming">
+  <div class="app">
+    <div class="header">
+      <h1>🎤 Voice Journal</h1>
+      <p class="streak">🔥 <span id="streakCount">0</span> day streak!</p>
+    </div>
+    
+    <div class="section">
+      <p style="text-align:center;color:#666;">Pick your mood:</p>
+      <div class="mood-picker">
+        <div class="mood" onclick="selectMood('😎')" data-mood="😎">😎</div>
+        <div class="mood" onclick="selectMood('🤩')" data-mood="🤩">🤩</div>
+        <div class="mood" onclick="selectMood('😐')" data-mood="😐">😐</div>
+        <div class="mood" onclick="selectMood('😢')" data-mood="😢">😢</div>
+        <div class="mood" onclick="selectMood('😡')" data-mood="😡">😡</div>
+        <div class="mood" onclick="selectMood('🥳')" data-mood="🥳">🥳</div>
+        <div class="mood" onclick="selectMood('🤔')" data-mood="🤔">🤔</div>
+        <div class="mood" onclick="selectMood('🥰')" data-mood="🥰">🥰</div>
+      </div>
+      
+      <div class="prompt-box" onclick="newPrompt()">
+        💭 Tap for a random prompt
+        <div id="promptText" style="font-size:14px;margin-top:5px;opacity:0.8;"></div>
+      </div>
+      
+      <button id="recordBtn" class="record-btn" onclick="toggleRecord()">🎤</button>
+      <div id="timer" class="timer">0:00</div>
+      <p id="status" style="text-align:center;color:#666;">Tap to start recording</p>
+      
+      <div id="entry" class="entry" style="display:none;">
+        <span id="entryMood"></span>
+        <p id="entryText"></p>
+        <p class="date" id="entryDate"></p>
+        <div id="aiReaction" class="ai-reaction"></div>
+      </div>
+      
+      <div class="controls" id="controls" style="display:none;">
+        <button class="btn btn-sound" onclick="playSound('whoosh')">🎵 Whoosh</button>
+        <button class="btn btn-sound" onclick="playSound('boing')">🎵 Boing</button>
+        <button class="btn btn-sound" onclick="playSound('success')">🎵 Ding!</button>
+        <button class="btn btn-export" onclick="exportEntry()">📸 Save</button>
+        <button class="btn btn-save" onclick="saveEntry()">💾 Save</button>
+        <button class="btn btn-clear" onclick="clearEntry()">🗑️ Clear</button>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h3>🎨 Themes</h3>
+      <div class="themes">
+        <div class="theme-btn" style="background:linear-gradient(135deg,#0f0c29,#302b63)" onclick="setTheme('space')"></div>
+        <div class="theme-btn" style="background:linear-gradient(135deg,#00d2ff,#3a7bd5)" onclick="setTheme('beach')"></div>
+        <div class="theme-btn" style="background:linear-gradient(135deg,#1a1a2e,#16213e)" onclick="setTheme('gaming')"></div>
+        <div class="theme-btn" style="background:linear-gradient(135deg,#ff9a9e,#fecfef)" onclick="setTheme('anime')"></div>
+        <div class="theme-btn" style="background:linear-gradient(135deg,#00f260,#0575e6)" onclick="setTheme('neon')"></div>
+      </div>
+      
+      <h3>📚 Your Entries</h3>
+      <div id="history" class="history"></div>
+    </div>
+  </div>
+  
+  <div id="soundFx" class="sound-fx">🎵</div>
+
+  <script>
+    const prompts = [
+      "What's the most random thing that happened today?",
+      "If you could have any superpower, what would it be?",
+      "What's something that made you laugh today?",
+      "Describe your perfect day",
+      "What's a goal you want to achieve this week?",
+      "Who is someone you look up to? Why?",
+      "What's something you're grateful for right now?",
+      "If you could eat only one food forever, what would it be?",
+      "What's a fear you want to overcome?",
+      "What's the best thing that happened this week?",
+      "If you could travel anywhere, where would you go?",
+      "What's something new you learned today?",
+      "Describe your best friend",
+      "What's a rule you wish didn't exist?",
+      "What's your favorite game right now?"
+    ];
+    
+    const aiReactions = [
+      "🔥 That's honestly epic!",
+      "😂 I'm literally cryinggg",
+      "🙌 Living for this energy!",
+      "💯 Absolute legend behavior!",
+      "🤯 Wait that's actually crazy!",
+      "❤️‍🔥 This is giving main character energy!",
+      "✨ Slay queen/king!",
+      "🎉 Periodt! No cap!",
+      "💪 We love to see it!",
+      "😤 I can't even... so cool!"
+    ];
+    
+    let selectedMood = '';
+    let isRecording = false;
+    let recognition = null;
+    let timer = null;
+    let seconds = 0;
+    let transcript = '';
+    let entries = JSON.parse(localStorage.getItem('journalEntries') || '[]');
+    let streak = parseInt(localStorage.getItem('journalStreak') || '0');
+    
+    // Load streak
+    document.getElementById('streakCount').textContent = streak;
+    
+    // Load history
+    renderHistory();
+    
+    // New prompt on load
+    newPrompt();
+    
+    function newPrompt() {
+      const prompt = prompts[Math.floor(Math.random() * prompts.length)];
+      document.getElementById('promptText').textContent = prompt;
+    }
+    
+    function selectMood(mood) {
+      document.querySelectorAll('.mood').forEach(m => m.classList.remove('selected'));
+      if (selectedMood === mood) {
+        selectedMood = '';
+      } else {
+        selectedMood = mood;
+        event.target.classList.add('selected');
+      }
+    }
+    
+    function setTheme(theme) {
+      document.body.className = 'theme-' + theme;
+    }
+    
+    function toggleRecord() {
+      if (isRecording) {
+        stopRecording();
+      } else {
+        startRecording();
+      }
+    }
+    
+    function startRecording() {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) {
+        document.getElementById('status').textContent = 'Use Chrome!';
+        return;
+      }
+      
+      recognition = new SR();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      
+      recognition.onstart = function() {
+        isRecording = true;
+        transcript = '';
+        seconds = 0;
+        document.getElementById('recordBtn').classList.add('recording');
+        document.getElementById('recordBtn').textContent = '⏹';
+        document.getElementById('status').textContent = 'Listening... Talk away!';
+        
+        timer = setInterval(function() {
+          seconds++;
+          document.getElementById('timer').textContent = Math.floor(seconds/60) + ':' + String(seconds%60).padStart(2,'0');
+        }, 1000);
+      };
+      
+      recognition.onresult = function(event) {
+        let final = '', interim = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          if (event.results[i].isFinal) {
+            final += event.results[i][0].transcript + ' ';
+          } else {
+            interim += event.results[i][0].transcript;
+          }
+        }
+        if (final) transcript += final;
+        if (interim) document.getElementById('status').textContent = '📝 ' + interim.substring(0,50);
+      };
+      
+      recognition.onend = function() {
+        if (isRecording) {
+          try { recognition.start(); } catch(e) {}
+        }
+      };
+      
+      try {
+        recognition.start();
+      } catch(e) {
+        document.getElementById('status').textContent = 'Error: ' + e.message;
+      }
+    }
+    
+    function stopRecording() {
+      isRecording = false;
+      if (recognition) recognition.stop();
+      clearInterval(timer);
+      
+      document.getElementById('recordBtn').classList.remove('recording');
+      document.getElementById('recordBtn').textContent = '🎤';
+      
+      if (transcript) {
+        showEntry(transcript);
+      } else {
+        document.getElementById('status').textContent = 'No speech detected';
+      }
+    }
+    
+    function addAutoEmojis(text) {
+      text = text.toLowerCase();
+      let result = text;
+      
+      const emojiMap = {
+        'happy': '😊', 'glad': '😊', 'excited': '🤩', 'love': '🥰',
+        'sad': '😢', 'cry': '😢', 'angry': '😡', 'mad': '😡',
+        'laugh': '😂', 'funny': '😂', 'cool': '😎', 'wow': '🤯',
+        'fire': '🔥', 'lit': '🔥', 'go': '💪', 'win': '🏆',
+        'game': '🎮', 'music': '🎵', 'food': '🍕', 'pizza': '🍕',
+        'sleep': '😴', 'tired': '😴', 'sick': '🤒', 'hurt': '😣',
+        'think': '🤔', 'idea': '💡', 'money': '💰', 'star': '⭐'
+      };
+      
+      for (const [word, emoji] of Object.entries(emojiMap)) {
+        if (text.includes(word) && !result.includes(emoji)) {
+          result += ' ' + emoji;
+        }
+      }
+      
+      return result;
+    }
+    
+    function showEntry(text) {
+      const cleaned = addAutoEmojis(text);
+      const mood = selectedMood || '🤔';
+      const date = new Date().toLocaleString('en-AU');
+      const aiReaction = aiReactions[Math.floor(Math.random() * aiReactions.length)];
+      
+      document.getElementById('entry').style.display = 'block';
+      document.getElementById('entryMood').textContent = mood;
+      document.getElementById('entryText').textContent = cleaned;
+      document.getElementById('entryDate').textContent = date;
+      document.getElementById('aiReaction').textContent = '🤖 ' + aiReaction;
+      document.getElementById('controls').style.display = 'flex';
+      document.getElementById('status').textContent = 'Tap mic to record again';
+      
+      // Update streak
+      updateStreak();
+    }
+    
+    function updateStreak() {
+      const lastDate = localStorage.getItem('lastJournalDate');
+      const today = new Date().toDateString();
+      
+      if (lastDate !== today) {
+        streak++;
+        localStorage.setItem('journalStreak', streak);
+        localStorage.setItem('lastJournalDate', today);
+        document.getElementById('streakCount').textContent = streak;
+      }
+    }
+    
+    function saveEntry() {
+      const entry = {
+        mood: selectedMood || '🤔',
+        text: document.getElementById('entryText').textContent,
+        date: new Date().toLocaleString('en-AU'),
+        aiReaction: document.getElementById('aiReaction').textContent
+      };
+      
+      entries.unshift(entry);
+      localStorage.setItem('journalEntries', JSON.stringify(entries));
+      renderHistory();
+      playSound('success');
+    }
+    
+    function renderHistory() {
+      const container = document.getElementById('history');
+      container.innerHTML = entries.map(e => `
+        <div class="entry">
+          <span style="font-size:20px">${e.mood}</span>
+          <p>${e.text}</p>
+          <p class="date">${e.date}</p>
+          <div class="ai-reaction">${e.aiReaction}</div>
+        </div>
+      `).join('');
+    }
+    
+    function clearEntry() {
+      document.getElementById('entry').style.display = 'none';
+      document.getElementById('controls').style.display = 'none';
+      transcript = '';
+      selectedMood = '';
+      document.querySelectorAll('.mood').forEach(m => m.classList.remove('selected'));
+    }
+    
+    function playSound(type) {
+      const soundFx = document.getElementById('soundFx');
+      
+      if (type === 'whoosh') {
+        soundFx.textContent = '💨';
+      } else if (type === 'boing') {
+        soundFx.textContent = '🐰';
+      } else if (type === 'success') {
+        soundFx.textContent = '🎉';
+      }
+      
+      soundFx.classList.add('show');
+      setTimeout(() => soundFx.classList.remove('show'), 500);
+    }
+    
+    function exportEntry() {
+      alert('📸 Screenshot this page to share your entry!');
+    }
+  </script>
+</body>
+</html>
