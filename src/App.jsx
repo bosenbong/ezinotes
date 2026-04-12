@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 
 export default function App() {
+  alert('App component rendered!')
   const timerRef = useRef(null)
   
   const [isRecording, setIsRecording] = useState(false)
