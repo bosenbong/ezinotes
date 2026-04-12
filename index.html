@@ -153,11 +153,22 @@
       
       recognition.onerror = function(event) {
         statusEl.textContent = 'Error: ' + event.error;
+        // If no-speech error, try to restart
+        if (event.error === 'no-speech' && isRecording) {
+          setTimeout(function() {
+            try { recognition.start(); } catch(e) {}
+          }, 500);
+        }
       };
       
       recognition.onend = function() {
         if (isRecording) {
-          try { recognition.start(); } catch(e) {}
+          // Keep trying to restart
+          setTimeout(function() {
+            if (isRecording) {
+              try { recognition.start(); } catch(e) {}
+            }
+          }, 300);
         }
       };
       
