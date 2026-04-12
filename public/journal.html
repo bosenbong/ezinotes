@@ -686,6 +686,7 @@
           <div style="font-size:12px;color:#999;margin-bottom:15px;">${entry.date}</div>
           <div class="entry-text" style="font-size:20px;">${entry.text}</div>
           ${entry.opinion ? `<div class="ai-opinion" style="margin-top:20px;font-size:14px;"><strong>🤖 My Thoughts:</strong><p>${entry.opinion}</p></div>` : ''}
+          <button onclick="deletePage(${currentPage})" style="margin-top:20px;padding:8px 15px;background:#ff4757;color:white;border:none;border-radius:8px;cursor:pointer;">🗑️ Delete this page</button>
         </div>
       `;
       
@@ -706,6 +707,21 @@
       if (currentPage < entries.length - 1) {
         currentPage++;
         updateJournalView();
+      }
+    }
+    
+    function deletePage(pageIndex) {
+      if (confirm('Are you sure you want to delete this entry? 🤔')) {
+        entries.splice(pageIndex, 1);
+        localStorage.setItem('journalEntries', JSON.stringify(entries));
+        
+        // Adjust current page if needed
+        if (currentPage >= entries.length) {
+          currentPage = Math.max(0, entries.length - 1);
+        }
+        
+        updateJournalView();
+        alert('Entry deleted! 🗑️');
       }
     }
     
