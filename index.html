@@ -132,9 +132,19 @@
 
     async function startRecording() {
       try {
+        statusEl.textContent = 'Starting...';
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         
-        mediaRecorder = new MediaRecorder(stream);
+        // Check supported MIME type
+        let mimeType = 'audio/webm';
+        if (!MediaRecorder.isTypeSupported('audio/webm')) {
+          mimeType = 'audio/mp4';
+          if (!MediaRecorder.isTypeSupported('audio/mp4')) {
+            mimeType = 'audio/ogg';
+          }
+        }
+        
+        mediaRecorder = new MediaRecorder(stream, { mimeType });
         audioChunks = [];
         
         mediaRecorder.ondataavailable = function(event) {
@@ -144,16 +154,16 @@
         };
         
         mediaRecorder.onstop = async function() {
-          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
           stream.getTracks().forEach(track => track.stop());
           
           if (audioChunks.length > 0) {
             statusEl.textContent = 'Transcribing...';
+            const audioBlob = new Blob(audioChunks, { type: mimeType });
             await transcribeAudio(audioBlob);
           }
         };
         
-        mediaRecorder.start(100); // Collect data every 100ms
+        mediaRecorder.start(100);
         isRecording = true;
         fullTranscript = '';
         seconds = 0;
@@ -168,7 +178,7 @@
         
       } catch(e) {
         statusEl.textContent = 'Error: ' + e.message;
-        alert('Please allow microphone access');
+        alert('Error: ' + e.message + '. Please allow microphone access.');
       }
     }
 

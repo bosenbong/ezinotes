@@ -21,9 +21,16 @@ export async function POST(request) {
     const arrayBuffer = await audioFile.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
     
+    // Get original filename/type
+    const fileName = audioFile.name || 'audio.webm'
+    let mimeType = 'audio/webm'
+    if (fileName.endsWith('.mp4') || fileName.endsWith('.m4a')) mimeType = 'audio/mp4'
+    if (fileName.endsWith('.ogg')) mimeType = 'audio/ogg'
+    
     // Create form data for OpenAI
     const form = new FormData()
-    form.append('file', new Blob([buffer]), 'audio.webm')
+    const blob = new Blob([buffer], { type: mimeType })
+    form.append('file', blob, fileName)
     form.append('model', 'whisper-1')
     form.append('language', 'en')
     
