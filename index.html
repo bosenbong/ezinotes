@@ -112,8 +112,7 @@
     const btnRow2 = document.getElementById('btnRow2');
     
     let isRecording = false;
-    let mediaRecorder = null;
-    let audioChunks = [];
+    let recognition = null;
     let timer = null;
     let seconds = 0;
     let fullTranscript = '';
@@ -131,82 +130,8 @@
     };
 
     function startRecording() {
-      // Use MediaRecorder for reliable recording
-      navigator.mediaDevices.getUserMedia({ audio: true })
-        .then(stream => {
-          let mimeType = 'audio/webm';
-          if (!MediaRecorder.isTypeSupported('audio/webm')) {
-            mimeType = MediaRecorder.isTypeSupported('audio/mp4') ? 'audio/mp4' : 'audio/ogg';
-          }
-          
-          mediaRecorder = new MediaRecorder(stream, { mimeType });
-          audioChunks = [];
-          
-          mediaRecorder.ondataavailable = e => {
-            if (e.data.size > 0) audioChunks.push(e.data);
-          };
-          
-          mediaRecorder.onstop = async () => {
-            stream.getTracks().forEach(t => t.stop());
-            if (audioChunks.length > 0) {
-              statusEl.textContent = 'Transcribing...';
-              const blob = new Blob(audioChunks, { type: mimeType });
-              await transcribeAudio(blob);
-            }
-          };
-          
-          mediaRecorder.start(100);
-          isRecording = true;
-          fullTranscript = '';
-          seconds = 0;
-          recordBtn.textContent = '⏹';
-          recordBtn.classList.add('recording');
-          statusEl.textContent = 'Recording... speak now';
-          
-          timer = setInterval(() => {
-            seconds++;
-            timerEl.textContent = fmtTime(seconds);
-          }, 1000);
-        })
-        .catch(e => {
-          statusEl.textContent = 'Error: ' + e.message;
-          alert('Please allow microphone access');
-        });
-    }
-
-    function stopRecording() {
-      isRecording = false;
-      clearInterval(timer);
-      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-        mediaRecorder.stop();
-      }
-      recordBtn.textContent = '🎤';
-      recordBtn.classList.remove('recording');
-    }
-
-    async function transcribeAudio(blob) {
-      try {
-        const formData = new FormData();
-        formData.append('audio', blob, 'recording.webm');
-        
-        const res = await fetch('/api/transcribe', { method: 'POST', body: formData });
-        const data = await res.json();
-        
-        if (data.transcript) {
-          fullTranscript = data.transcript;
-          noteBox.textContent = formatNote(fullTranscript);
-          statusEl.textContent = 'Done! Tap mic to record again';
-          btnRow.style.display = 'flex';
-          btnRow2.style.display = 'flex';
-        } else {
-          statusEl.textContent = 'Error: ' + (data.error || 'Transcription failed');
-        }
-      } catch(e) {
-        statusEl.textContent = 'Error: ' + e.message;
-      }
-    }
-
-    function formatNote(text) {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) {
         statusEl.textContent = 'Speech not supported - try Chrome';
         return;
       }
@@ -280,6 +205,34 @@
       }
     }
 
+    function stopRecording() {
+      isRecording = false;
+      if (recognition) recognition.stop();
+      clearInterval(timer);
+      
+      recordBtn.textContent = '🎤';
+      recordBtn.classList.remove('recording');
+      
+      if (fullTranscript) {
+        noteBox.textContent = formatNote(fullTranscript);
+        statusEl.textContent = 'Done! Tap mic to record again';
+        btnRow.style.display = 'flex';
+        btnRow2.style.display = 'flex';
+      } else {
+        statusEl.textContent = 'No speech detected - try again';
+      }
+    }
+
+    function formatNote(text) {
+      // Remove duplicate words
+      let words = text.toLowerCase().split(/\s+/);
+      let deduped = [];
+      for (let j = 0; j < words.length; j++) {
+        if (j >= 1 && words[j] === words[j-1]) continue; // skip doubles
+        if (j >= 2 && words[j] === words[j-2]) continue; // skip triples
+        deduped.push(words[j]);
+      }
+      text = deduped.join(' ');
       
       // Capitalize first letter and add period if needed
       text = text.trim();
