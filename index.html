@@ -80,7 +80,7 @@
       ⚠️ <strong>Beta Test:</strong> Use initials only (e.g., S.G.). Don't enter real client names. 
     </div>
     <div class="content">
-      <button id="recordBtn" class="record-btn">🎤</button>
+      <button id="recordBtn" onclick="handleRecordClick()" class="record-btn">🎤</button>
       <div id="timer" class="timer">0:00</div>
       <p id="status" class="status">Tap mic to start</p>
       <div id="noteBox" class="note-box">Your note will appear here...</div>
@@ -123,6 +123,10 @@
     }
 
     recordBtn.onclick = function() {
+      handleRecordClick();
+    };
+
+    function handleRecordClick() {
       if (isRecording) {
         stopRecording();
       } else {
@@ -131,6 +135,7 @@
     };
 
     async function startRecording() {
+      console.log('Starting recording...');
       try {
         statusEl.textContent = 'Starting...';
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
