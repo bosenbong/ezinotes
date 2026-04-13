@@ -80,7 +80,7 @@
       ⚠️ <strong>Beta Test:</strong> Use initials only (e.g., S.G.). Don't enter real client names. 
     </div>
     <div class="content">
-      <button id="recordBtn" class="record-btn">🎤</button>
+      <button id="recordBtn" onclick="handleRecordClick()" class="record-btn">🎤</button>
       <div id="timer" class="timer">0:00</div>
       <p id="status" class="status">Tap mic to start</p>
       <div id="noteBox" class="note-box">Your note will appear here...</div>
@@ -123,99 +123,52 @@
     }
 
     recordBtn.onclick = function() {
+      handleRecordClick();
+    }
+
+    function handleRecordClick() {
       if (isRecording) {
         stopRecording();
       } else {
         startRecording();
       }
-    };
-
-    function startRecording() {
-      // Use MediaRecorder for reliable recording
-      navigator.mediaDevices.getUserMedia({ audio: true })
-        .then(stream => {
-          let mimeType = 'audio/webm';
-          if (!MediaRecorder.isTypeSupported('audio/webm')) {
-            mimeType = MediaRecorder.isTypeSupported('audio/mp4') ? 'audio/mp4' : 'audio/ogg';
-          }
-          
-          mediaRecorder = new MediaRecorder(stream, { mimeType });
-          audioChunks = [];
-          
-          mediaRecorder.ondataavailable = e => {
-            if (e.data.size > 0) audioChunks.push(e.data);
-          };
-          
-          mediaRecorder.onstop = async () => {
-            stream.getTracks().forEach(t => t.stop());
-            if (audioChunks.length > 0) {
-              statusEl.textContent = 'Transcribing...';
-              const blob = new Blob(audioChunks, { type: mimeType });
-              await transcribeAudio(blob);
-            }
-          };
-          
-          mediaRecorder.start(100);
-          isRecording = true;
-          fullTranscript = '';
-          seconds = 0;
-          recordBtn.textContent = '⏹';
-          recordBtn.classList.add('recording');
-          statusEl.textContent = 'Recording... speak now';
-          
-          timer = setInterval(() => {
-            seconds++;
-            timerEl.textContent = fmtTime(seconds);
-          }, 1000);
-        })
-        .catch(e => {
-          statusEl.textContent = 'Error: ' + e.message;
-          alert('Please allow microphone access');
-        });
     }
 
-    function stopRecording() {
-      isRecording = false;
-      clearInterval(timer);
-      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-        mediaRecorder.stop();
-      }
-      recordBtn.textContent = '🎤';
-      recordBtn.classList.remove('recording');
-    }
-
-    async function transcribeAudio(blob) {
+    async function startRecording() {
+      console.log('Starting recording...');
       try {
-        const formData = new FormData();
-        formData.append('audio', blob, 'recording.webm');
+        statusEl.textContent = 'Starting...';
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         
-        const res = await fetch('/api/transcribe', { method: 'POST', body: formData });
-        const data = await res.json();
-        
-        if (data.transcript) {
-          fullTranscript = data.transcript;
-          noteBox.textContent = formatNote(fullTranscript);
-          statusEl.textContent = 'Done! Tap mic to record again';
-          btnRow.style.display = 'flex';
-          btnRow2.style.display = 'flex';
-        } else {
-          statusEl.textContent = 'Error: ' + (data.error || 'Transcription failed');
+        // Check supported MIME type
+        let mimeType = 'audio/webm';
+        if (!MediaRecorder.isTypeSupported('audio/webm')) {
+          mimeType = 'audio/mp4';
+          if (!MediaRecorder.isTypeSupported('audio/mp4')) {
+            mimeType = 'audio/ogg';
+          }
         }
-      } catch(e) {
-        statusEl.textContent = 'Error: ' + e.message;
-      }
-    }
-
-    function formatNote(text) {
-        statusEl.textContent = 'Speech not supported - try Chrome';
-        return;
-      }
-      
-      recognition = new SR();
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      
-      recognition.onstart = function() {
+        
+        mediaRecorder = new MediaRecorder(stream, { mimeType });
+        audioChunks = [];
+        
+        mediaRecorder.ondataavailable = function(event) {
+          if (event.data.size > 0) {
+            audioChunks.push(event.data);
+          }
+        };
+        
+        mediaRecorder.onstop = async function() {
+          stream.getTracks().forEach(track => track.stop());
+          
+          if (audioChunks.length > 0) {
+            statusEl.textContent = 'Transcribing...';
+            const audioBlob = new Blob(audioChunks, { type: mimeType });
+            await transcribeAudio(audioBlob);
+          }
+        };
+        
+        mediaRecorder.start(100);
         isRecording = true;
         fullTranscript = '';
         seconds = 0;
@@ -227,61 +180,63 @@
           seconds++;
           timerEl.textContent = fmtTime(seconds);
         }, 1000);
-      };
-      
-      recognition.onresult = function(event) {
-        let final = '', interim = '';
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const t = event.results[i][0].transcript.trim();
-          if (!t) continue;
-          if (event.results[i].isFinal) {
-            // Remove duplicate words
-            let words = t.toLowerCase().split(/\s+/);
-            let deduped = [];
-            for (let j = 0; j < words.length; j++) {
-              if (j >= 1 && words[j] === words[j-1]) continue; // Skip same word twice
-              if (j >= 2 && words[j] === words[j-2]) continue; // Skip triple
-              deduped.push(words[j]);
-            }
-            final += deduped.join(' ') + ' ';
-          } else {
-            interim += t;
-          }
-        }
-        if (final) fullTranscript += final;
-        if (interim) statusEl.textContent = 'Listening: ' + interim.substring(0,30);
-      };
-      
-      recognition.onerror = function(event) {
-        statusEl.textContent = 'Error: ' + event.error;
-        // If no-speech error, try to restart
-        if (event.error === 'no-speech' && isRecording) {
-          setTimeout(function() {
-            try { recognition.start(); } catch(e) {}
-          }, 500);
-        }
-      };
-      
-      recognition.onend = function() {
-        if (isRecording) {
-          // Keep trying to restart
-          setTimeout(function() {
-            if (isRecording) {
-              try { recognition.start(); } catch(e) {}
-            }
-          }, 300);
-        }
-      };
-      
-      try {
-        recognition.start();
+        
       } catch(e) {
         statusEl.textContent = 'Error: ' + e.message;
+        alert('Error: ' + e.message + '. Please allow microphone access.');
       }
     }
 
+    async function stopRecording() {
+      isRecording = false;
+      clearInterval(timer);
       
-      // Capitalize first letter and add period if needed
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+      }
+      
+      recordBtn.textContent = '🎤';
+      recordBtn.classList.remove('recording');
+    }
+
+    async function transcribeAudio(audioBlob) {
+      try {
+        const formData = new FormData();
+        formData.append('audio', audioBlob, 'recording.webm');
+        
+        const response = await fetch('/api/transcribe', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.transcript) {
+          fullTranscript = data.transcript;
+          noteBox.textContent = formatNote(fullTranscript);
+          statusEl.textContent = 'Done! Tap mic to record again';
+          btnRow.style.display = 'flex';
+          btnRow2.style.display = 'flex';
+        } else if (data.error) {
+          statusEl.textContent = 'Error: ' + data.error;
+          alert('Transcription failed: ' + data.error);
+        }
+      } catch(e) {
+        statusEl.textContent = 'Error: ' + e.message;
+        alert('Transcription error: ' + e.message);
+      }
+    }
+
+    function formatNote(text) {
+      // Remove duplicate words
+      let words = text.toLowerCase().split(/\s+/);
+      let deduped = [];
+      for (let j = 0; j < words.length; j++) {
+        if (j >= 1 && words[j] === words[j-1]) continue;
+        if (j >= 2 && words[j] === words[j-2]) continue;
+        deduped.push(words[j]);
+      }
+      text = deduped.join(' ');
       text = text.trim();
       text = text.charAt(0).toUpperCase() + text.slice(1);
       if (!text.match(/[.!?]$/)) text += '.';
@@ -289,6 +244,26 @@
       const now = new Date();
       const date = now.toLocaleDateString('en-AU', {day:'numeric', month:'long', year:'numeric'});
       return 'Client: [Name]\nDate/Time: 11:00am – 2:00pm\nService Type: Social & Domestic Support / Transport\n\nACTIVITIES UNDERTAKEN:\n' + text + '\n\nWELLBEING/OUTCOME:\n- Client remained happy, healthy, and engaged.\n- All tasks completed.\n\nDEPARTURE:\nLeft at 2:00pm on time.';
+    }
+      }
+    }
+
+    function stopRecording() {
+      isRecording = false;
+      if (recognition) recognition.stop();
+      clearInterval(timer);
+      
+      recordBtn.textContent = '🎤';
+      recordBtn.classList.remove('recording');
+      
+      if (fullTranscript) {
+        noteBox.textContent = formatNote(fullTranscript);
+        statusEl.textContent = 'Done! Tap mic to record again';
+        btnRow.style.display = 'flex';
+        btnRow2.style.display = 'flex';
+      } else {
+        statusEl.textContent = 'No speech detected - try again';
+      }
     }
 
     function polishNote() {
@@ -334,17 +309,10 @@
     }
 
     function sendFeedback() {
-      const text = document.getElementById('feedbackText').value.trim();
-      if (!text) {
-        alert('Please type some feedback first!');
-        return;
-      }
-      
-      // Send feedback (for now just show it works - in production would save to database)
-      alert('Thank you for your feedback! This helps us improve EziNotes. 💜');
-      document.getElementById('feedbackText').value = '';
+      // Open Google Form in new tab
+      window.open('https://docs.google.com/forms/d/e/1FAIpQLSePhzuaFIR6WwDINMza57DM8wSM0uEGzOfXN8wj_BlKgzIGxw/viewform?usp=publish_editor', '_blank');
       document.getElementById('feedbackSection').style.display = 'none';
-      statusEl.textContent = 'Feedback sent!';
+      statusEl.textContent = 'Thanks for testing!';
     }
   </script>
 </body>
