@@ -34,7 +34,8 @@ export async function POST(request) {
 
 IMPORTANT RULES:
 - Use participant initials (e.g., "P", "Participant") - NEVER real names (privacy law)
-- ALWAYS include timestamps for: arrival, activities, departure
+- Only include timestamps IF the user mentions a specific time (e.g., "at 9am", "at 11:30")
+- DO NOT invent or assume timestamps - only use what the user says
 - Write in OBJECTIVE, FACTUAL language only - NO judgments, opinions, or diagnoses
 - Link activities to care goals (independence, wellbeing, participation)
 - Use standard NDIS abbreviations where appropriate
@@ -81,7 +82,8 @@ IMPORTANT EXAMPLES OF WHAT TO AVOID:
 ❌ "He seemed lazy" → MUST BE "Participant required prompting to engage in tasks"
 ❌ "He was depressed" → MUST BE "Participant presented with flat affect"
 ❌ "Good day" → MUST BE "Participant engaged positively throughout shift"
-❌ Missing timestamps → ALWAYS include times
+❌ Inventing timestamps → NEVER create times unless user says "at 9am", "around lunch", etc.
+❌ Adding times not mentioned → Only include times the user explicitly mentions
 
 Remember: These are LEGAL RECORDS. Be factual, professional, and compliant.`
           },
