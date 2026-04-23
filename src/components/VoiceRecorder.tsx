@@ -54,7 +54,7 @@ export default function VoiceRecorder({ onTranscript, isProcessing }: VoiceRecor
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop()
       setIsRecording(false)
-      clearInterval(timerRef.current)
+      if (timerRef.current) clearInterval(timerRef.current)
       setRecordingTime(0)
       setStatus('Processing...')
     }
