@@ -266,7 +266,7 @@ export default function NoteEditor({
               </button>
               <PDFExport 
                 note={polishedNote} 
-                clientName={selectedClient?.name}
+                clientName={(selectedClient as any)?.name}
                 serviceType={serviceType}
               />
             </div>
