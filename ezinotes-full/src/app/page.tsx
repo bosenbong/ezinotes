@@ -1,12 +1,18 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import VoiceRecorder from '@/components/VoiceRecorder'
 import NoteEditor from '@/components/NoteEditor'
+import ClientManager from '@/components/ClientManager'
+
+// Demo mode - in production this would come from Supabase Auth
+const DEMO_USER_ID = 'demo-user-123'
 
 export default function Home() {
   const [transcript, setTranscript] = useState('')
+  const [selectedClient, setSelectedClient] = useState<any>(null)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [userId] = useState(DEMO_USER_ID) // Demo mode
 
   return (
     <main style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #2563eb, #7c3aed)', padding: '20px' }}>
@@ -21,8 +27,15 @@ export default function Home() {
           isProcessing={isProcessing}
         />
 
-        <div style={{ borderTop: '1px solid #e5e7eb', padding: '0' }}>
-          <NoteEditor initialTranscript={transcript} />
+        <NoteEditor initialTranscript={transcript} />
+
+        {/* Client Manager */}
+        <div style={{ borderTop: '1px solid #e5e7eb' }}>
+          <ClientManager 
+            userId={userId}
+            selectedClient={selectedClient}
+            onSelectClient={setSelectedClient}
+          />
         </div>
 
         <div style={{ padding: '16px', textAlign: 'center', borderTop: '1px solid #e5e7eb', fontSize: '12px', color: '#666' }}>
