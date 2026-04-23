@@ -18,21 +18,20 @@ export async function POST(request: Request) {
     const arrayBuffer = await audioFile.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
 
-    // Create form data for Whisper API
-    const FormData = await import('form-data')
-    const form = new FormData.default()
-    form.append('file', buffer, { filename: 'audio.webm', contentType: audioFile.type })
-    form.append('model', 'whisper-1')
-    form.append('response_format', 'json')
+    // Create multipart form data manually
+    const boundary = '----FormBoundary' + Math.random().toString(36).substring(2)
+    const header = `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="audio.webm"\r\nContent-Type: audio/webm\r\n\r\n`
+    const footer = `\r\n--${boundary}--\r\n`
+    const body = Buffer.concat([Buffer.from(header), buffer, Buffer.from(footer)])
 
     // Call Whisper API
     const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
-        ...form.getHeaders(),
+        'Content-Type': `multipart/form-data; boundary=${boundary}`,
       },
-      body: form,
+      body: body,
     })
 
     if (!response.ok) {
