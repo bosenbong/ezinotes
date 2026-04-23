@@ -1,7 +1,3 @@
 {
-  "buildCommand": "cd ezinotes-full && npm run build",
-  "installCommand": "cd ezinotes-full && npm install",
-  "outputDirectory": "ezinotes-full/.next",
-  "framework": "nextjs",
   "rootDirectory": "ezinotes-full"
 }
