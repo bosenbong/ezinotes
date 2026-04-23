@@ -4,15 +4,20 @@ import { useState, useEffect } from 'react'
 import VoiceRecorder from '@/components/VoiceRecorder'
 import NoteEditor from '@/components/NoteEditor'
 import ClientManager from '@/components/ClientManager'
+import NoteList from '@/components/NoteList'
 
-// Demo mode - in production this would come from Supabase Auth
 const DEMO_USER_ID = 'demo-user-123'
 
 export default function Home() {
   const [transcript, setTranscript] = useState('')
+  const [polishedNote, setPolishedNote] = useState('')
   const [selectedClient, setSelectedClient] = useState<any>(null)
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [userId] = useState(DEMO_USER_ID) // Demo mode
+  const [showNotes, setShowNotes] = useState(false)
+  const [userId] = useState(DEMO_USER_ID)
+
+  const handleSaveNote = (note: string) => {
+    setPolishedNote(note)
+  }
 
   return (
     <main style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #2563eb, #7c3aed)', padding: '20px' }}>
@@ -24,19 +29,48 @@ export default function Home() {
 
         <VoiceRecorder 
           onTranscript={(t) => setTranscript(t)} 
-          isProcessing={isProcessing}
+          isProcessing={false}
         />
 
-        <NoteEditor initialTranscript={transcript} />
+        <NoteEditor 
+          initialTranscript={transcript} 
+          onSaveNote={handleSaveNote}
+          userId={userId}
+          selectedClient={selectedClient}
+        />
 
-        {/* Client Manager */}
-        <div style={{ borderTop: '1px solid #e5e7eb' }}>
-          <ClientManager 
-            userId={userId}
-            selectedClient={selectedClient}
-            onSelectClient={setSelectedClient}
-          />
+        {/* Toggle Notes List */}
+        <div style={{ padding: '0 16px' }}>
+          <button
+            onClick={() => setShowNotes(!showNotes)}
+            style={{
+              width: '100%',
+              padding: '12px',
+              borderRadius: '8px',
+              border: '1px solid #e5e7eb',
+              background: 'white',
+              color: '#374151',
+              fontSize: '14px',
+              cursor: 'pointer',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <span>📂 {showNotes ? 'Hide' : 'Show'} Saved Notes</span>
+            <span>›</span>
+          </button>
         </div>
+
+        {showNotes && (
+          <NoteList userId={userId} selectedClientId={selectedClient?.id} />
+        )}
+
+        <ClientManager 
+          userId={userId}
+          selectedClient={selectedClient}
+          onSelectClient={setSelectedClient}
+        />
 
         <div style={{ padding: '16px', textAlign: 'center', borderTop: '1px solid #e5e7eb', fontSize: '12px', color: '#666' }}>
           🔒 Audio stays on device • No data stored (demo mode)

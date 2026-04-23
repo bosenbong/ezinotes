@@ -94,3 +94,24 @@ npm run dev
 ```
 
 Visit http://localhost:3000
+
+### 4.1 Add Notes Table (if not already added)
+
+```sql
+-- Notes table (if not in main schema)
+create table if not exists public.notes (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references auth.users not null,
+  client_id uuid references public.clients(id),
+  transcript text,
+  polished_note text not null,
+  service_type text default 'Social & Domestic Support',
+  duration_minutes int default 60,
+  created_at timestamp with time zone default now()
+);
+
+alter table public.notes enable row level security;
+
+create policy "Users can manage own notes" on public.notes
+  for all using (auth.uid() = user_id);
+```

@@ -4,15 +4,30 @@ import { useState } from 'react'
 
 interface NoteEditorProps {
   initialTranscript?: string
+  onSaveNote?: (note: string) => void
+  userId: string
+  selectedClient?: { id: string } | null
 }
 
-export default function NoteEditor({ initialTranscript = '' }: NoteEditorProps) {
+export default function NoteEditor({ 
+  initialTranscript = '', 
+  onSaveNote,
+  userId,
+  selectedClient 
+}: NoteEditorProps) {
   const [transcript, setTranscript] = useState(initialTranscript)
   const [polishedNote, setPolishedNote] = useState('')
   const [useAbbreviations, setUseAbbreviations] = useState(true)
   const [translate, setTranslate] = useState(false)
+  const [serviceType, setServiceType] = useState('Social & Domestic Support')
+  const [duration, setDuration] = useState(60)
   const [isProcessing, setIsProcessing] = useState(false)
   const [status, setStatus] = useState('')
+
+  // Update transcript when initial changes
+  if (initialTranscript && initialTranscript !== transcript && !isProcessing) {
+    setTranscript(initialTranscript)
+  }
 
   const handlePolish = async () => {
     if (!transcript.trim()) {
@@ -50,6 +65,44 @@ export default function NoteEditor({ initialTranscript = '' }: NoteEditorProps) 
     setIsProcessing(false)
   }
 
+  const handleSave = async () => {
+    if (!polishedNote.trim()) {
+      setStatus('Polish a note first')
+      return
+    }
+
+    setIsProcessing(true)
+    setStatus('Saving...')
+
+    try {
+      const response = await fetch('/api/notes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          clientId: selectedClient?.id || null,
+          transcript,
+          polishedNote: polishedNote,
+          serviceType,
+          durationMinutes: duration,
+        }),
+      })
+
+      const data = await response.json()
+      
+      if (data.note) {
+        setStatus('Saved!')
+        if (onSaveNote) onSaveNote(polishedNote)
+      } else {
+        setStatus('Demo mode - note not saved (connect Supabase)')
+      }
+    } catch (err) {
+      setStatus('Demo mode - note not saved')
+    }
+
+    setIsProcessing(false)
+  }
+
   const copyToClipboard = () => {
     navigator.clipboard.writeText(polishedNote)
     setStatus('Copied!')
@@ -57,44 +110,83 @@ export default function NoteEditor({ initialTranscript = '' }: NoteEditorProps) 
 
   return (
     <div style={{ padding: '24px' }}>
+      {/* Service Type & Duration */}
+      <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
+        <select
+          value={serviceType}
+          onChange={(e) => setServiceType(e.target.value)}
+          style={{
+            flex: 1,
+            padding: '10px',
+            borderRadius: '8px',
+            border: '1px solid #e5e7eb',
+            fontSize: '13px',
+            background: 'white',
+          }}
+        >
+          <option>Social & Domestic Support</option>
+          <option>Transport</option>
+          <option>Community Access</option>
+          <option>Therapy Support</option>
+          <option>Household Tasks</option>
+        </select>
+        
+        <select
+          value={duration}
+          onChange={(e) => setDuration(Number(e.target.value))}
+          style={{
+            width: '100px',
+            padding: '10px',
+            borderRadius: '8px',
+            border: '1px solid #e5e7eb',
+            fontSize: '13px',
+            background: 'white',
+          }}
+        >
+          <option value={30}>30 min</option>
+          <option value={60}>1 hr</option>
+          <option value={90}>1.5 hr</option>
+          <option value={120}>2 hr</option>
+          <option value={180}>3 hr</option>
+          <option value={240}>4 hr</option>
+        </select>
+      </div>
+
       {/* Settings */}
       <div style={{ 
         display: 'flex', 
         gap: '16px', 
-        marginBottom: '20px',
+        marginBottom: '16px',
         flexWrap: 'wrap'
       }}>
-        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px' }}>
           <input
             type="checkbox"
             checked={useAbbreviations}
             onChange={(e) => setUseAbbreviations(e.target.checked)}
           />
-          Use Abbreviations
+          Abbr.
         </label>
         
-        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px' }}>
           <input
             type="checkbox"
             checked={translate}
             onChange={(e) => setTranslate(e.target.checked)}
           />
-          Translate to English
+          Translate
         </label>
       </div>
 
       {/* Transcript Input */}
       <div style={{ marginBottom: '16px' }}>
-        <label style={{ fontSize: '14px', color: '#666', marginBottom: '8px', display: 'block' }}>
-          Your Voice Transcript
-        </label>
         <textarea
           value={transcript}
           onChange={(e) => setTranscript(e.target.value)}
           placeholder="Your voice transcript will appear here, or type directly..."
           style={{
             width: '100%',
-            minHeight: '100px',
+            minHeight: '80px',
             padding: '12px',
             borderRadius: '12px',
             border: '1px solid #e5e7eb',
@@ -106,25 +198,44 @@ export default function NoteEditor({ initialTranscript = '' }: NoteEditorProps) 
         />
       </div>
 
-      {/* Polish Button */}
-      <button
-        onClick={handlePolish}
-        disabled={isProcessing || !transcript.trim()}
-        style={{
-          width: '100%',
-          padding: '14px',
-          borderRadius: '12px',
-          border: 'none',
-          background: isProcessing ? '#d1d5db' : '#10b981',
-          color: 'white',
-          fontSize: '16px',
-          fontWeight: '600',
-          cursor: isProcessing ? 'not-allowed' : 'pointer',
-          marginBottom: '16px'
-        }}
-      >
-        {isProcessing ? 'Processing...' : '✨ Polish Note'}
-      </button>
+      {/* Action Buttons */}
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+        <button
+          onClick={handlePolish}
+          disabled={isProcessing || !transcript.trim()}
+          style={{
+            flex: 1,
+            padding: '12px',
+            borderRadius: '8px',
+            border: 'none',
+            background: isProcessing ? '#d1d5db' : '#10b981',
+            color: 'white',
+            fontSize: '14px',
+            fontWeight: '600',
+            cursor: isProcessing ? 'not-allowed' : 'pointer',
+          }}
+        >
+          ✨ Polish
+        </button>
+        
+        <button
+          onClick={handleSave}
+          disabled={isProcessing || !polishedNote}
+          style={{
+            flex: 1,
+            padding: '12px',
+            borderRadius: '8px',
+            border: 'none',
+            background: isProcessing ? '#d1d5db' : '#2563eb',
+            color: 'white',
+            fontSize: '14px',
+            fontWeight: '600',
+            cursor: isProcessing ? 'not-allowed' : 'pointer',
+          }}
+        >
+          💾 Save
+        </button>
+      </div>
 
       {/* Polished Output */}
       {polishedNote && (
@@ -137,7 +248,7 @@ export default function NoteEditor({ initialTranscript = '' }: NoteEditorProps) 
             justifyContent: 'space-between',
             alignItems: 'center'
           }}>
-            <span>Polished NDIS Note</span>
+            <span>Polished Note</span>
             <button
               onClick={copyToClipboard}
               style={{
@@ -159,7 +270,9 @@ export default function NoteEditor({ initialTranscript = '' }: NoteEditorProps) 
             padding: '16px',
             whiteSpace: 'pre-wrap',
             fontSize: '14px',
-            fontFamily: 'monospace'
+            fontFamily: 'monospace',
+            maxHeight: '200px',
+            overflow: 'auto'
           }}>
             {polishedNote}
           </div>
@@ -171,8 +284,8 @@ export default function NoteEditor({ initialTranscript = '' }: NoteEditorProps) 
         <p style={{ 
           textAlign: 'center', 
           marginTop: '12px', 
-          fontSize: '14px',
-          color: status.includes('Error') ? '#ef4444' : '#10b981'
+          fontSize: '13px',
+          color: status.includes('Error') || status.includes('Demo') ? '#6b7280' : '#10b981'
         }}>
           {status}
         </p>
