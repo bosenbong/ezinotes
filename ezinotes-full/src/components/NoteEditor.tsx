@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import PDFExport from './PDFExport'
 
 interface NoteEditorProps {
   initialTranscript?: string
@@ -248,21 +249,27 @@ export default function NoteEditor({
             justifyContent: 'space-between',
             alignItems: 'center'
           }}>
-            <span>Polished Note</span>
-            <button
-              onClick={copyToClipboard}
-              style={{
-                padding: '6px 12px',
-                borderRadius: '8px',
-                border: 'none',
-                background: '#f3f4f6',
-                color: '#374151',
-                fontSize: '12px',
-                cursor: 'pointer'
-              }}
-            >
-              📋 Copy
-            </button>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                onClick={copyToClipboard}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: '#f3f4f6',
+                  color: '#374151',
+                  fontSize: '12px',
+                  cursor: 'pointer'
+                }}
+              >
+                📋 Copy
+              </button>
+              <PDFExport 
+                note={polishedNote} 
+                clientName={selectedClient?.name}
+                serviceType={serviceType}
+              />
+            </div>
           </div>
           <div style={{
             background: '#f3f4f6',

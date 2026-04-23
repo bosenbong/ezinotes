@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import VoiceRecorder from '@/components/VoiceRecorder'
 import NoteEditor from '@/components/NoteEditor'
 import ClientManager from '@/components/ClientManager'
@@ -22,9 +22,26 @@ export default function Home() {
   return (
     <main style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #2563eb, #7c3aed)', padding: '20px' }}>
       <div style={{ maxWidth: '500px', margin: '0 auto', background: 'white', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 25px 50px rgba(0,0,0,0.25)' }}>
-        <div style={{ background: '#2563eb', color: 'white', padding: '24px', textAlign: 'center' }}>
-          <h1 style={{ fontSize: '24px', margin: 0 }}>📝 EziNotes</h1>
-          <p style={{ margin: '4px 0 0', opacity: 0.9, fontSize: '14px' }}>Voice to NDIS notes</p>
+        {/* Header */}
+        <div style={{ background: '#2563eb', color: 'white', padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <h1 style={{ fontSize: '22px', margin: 0 }}>📝 EziNotes</h1>
+            <p style={{ margin: '2px 0 0', opacity: 0.9, fontSize: '13px' }}>Voice to NDIS notes</p>
+          </div>
+          <a 
+            href="/pricing"
+            style={{
+              padding: '6px 12px',
+              background: 'rgba(255,255,255,0.2)',
+              borderRadius: '8px',
+              color: 'white',
+              textDecoration: 'none',
+              fontSize: '12px',
+              fontWeight: '500',
+            }}
+          >
+            Upgrade
+          </a>
         </div>
 
         <VoiceRecorder 
@@ -58,7 +75,7 @@ export default function Home() {
             }}
           >
             <span>📂 {showNotes ? 'Hide' : 'Show'} Saved Notes</span>
-            <span>›</span>
+            <span style={{ transform: showNotes ? 'rotate(90deg)' : 'rotate(0)', transition: 'transform 0.2s' }}>›</span>
           </button>
         </div>
 
