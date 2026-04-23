@@ -7,7 +7,7 @@ interface NoteEditorProps {
   initialTranscript?: string
   onSaveNote?: (note: string) => void
   userId: string
-  selectedClient?: { id: string } | null
+  selectedClient?: { id: string; name?: string } | null
 }
 
 export default function NoteEditor({ 
