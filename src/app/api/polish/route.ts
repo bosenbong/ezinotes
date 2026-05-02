@@ -1,9 +1,11 @@
+import { NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
+
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
+export const fetchCache = 'default-no-store'
 
-import { NextResponse } from 'next/server'
-
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const { transcript, useAbbreviations = true, translate = false } = await request.json()
 
@@ -12,7 +14,6 @@ export async function POST(request: Request) {
     }
 
     const apiKey = process.env.OPENAI_API_KEY
-    console.log('API Key exists:', !!apiKey)
     
     if (!apiKey) {
       return NextResponse.json({ error: 'Server configuration error - missing API key' }, { status: 500 })
@@ -66,7 +67,6 @@ Client safe and comfortable.`
 
     if (!response.ok) {
       const error = await response.text()
-      console.log('OpenAI error:', error)
       return NextResponse.json({ error: 'AI processing failed', details: error }, { status: 500 })
     }
 
