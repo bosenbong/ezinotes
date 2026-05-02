@@ -14,74 +14,84 @@ export default function VoiceRecorder({ onTranscript, isProcessing }: VoiceRecor
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
   const timerRef = useRef<NodeJS.Timeout | null>(null)
+  const recognitionRef = useRef<any>(null)
 
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: 'audio/webm;codecs=opus'
-      })
-      
-      mediaRecorderRef.current = mediaRecorder
-      chunksRef.current = []
+  const startRecording = () => {
+    // Use browser's built-in speech recognition
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    
+    if (!SpeechRecognition) {
+      setStatus('Speech not supported. Try Chrome.')
+      return
+    }
 
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          chunksRef.current.push(e.data)
-        }
-      }
+    const recognition = new SpeechRecognition()
+    recognition.continuous = true
+    recognition.interimResults = true
+    recognitionRef.current = recognition
+    
+    let finalTranscript = ''
 
-      mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' })
-        await processAudio(audioBlob)
-        stream.getTracks().forEach(track => track.stop())
-      }
-
-      mediaRecorder.start(1000)
+    recognition.onstart = () => {
       setIsRecording(true)
       setStatus('Recording... speak now')
       
       timerRef.current = setInterval(() => {
         setRecordingTime(t => t + 1)
       }, 1000)
-    } catch (err) {
-      setStatus('Mic access denied')
-      console.error(err)
+    }
+
+    recognition.onresult = (event: any) => {
+      let interim = ''
+      
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript + ' '
+        } else {
+          interim += transcript
+        }
+      }
+      
+      if (interim) {
+        setStatus('Listening: ' + interim.substring(0, 30) + '...')
+      }
+    }
+
+    recognition.onerror = (event: any) => {
+      console.log('Speech error:', event.error)
+      setStatus('Error: ' + event.error)
+    }
+
+    recognition.onend = () => {
+      if (isRecording && finalTranscript) {
+        onTranscript(finalTranscript)
+        setStatus('Transcribed!')
+      } else if (isRecording) {
+        // Restart if still recording
+        try { recognition.start() } catch(e) {}
+      }
+    }
+
+    try {
+      recognition.start()
+    } catch(e) {
+      setStatus('Error starting: ' + e)
     }
   }
 
   const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop()
-      setIsRecording(false)
-      if (timerRef.current) clearInterval(timerRef.current)
-      setRecordingTime(0)
-      setStatus('Processing...')
+    if (recognitionRef.current) {
+      recognitionRef.current.stop()
+      recognitionRef.current = null
     }
-  }
-
-  const processAudio = async (audioBlob: Blob) => {
-    try {
-      const formData = new FormData()
-      formData.append('audio', audioBlob, 'audio.webm')
-
-      const response = await fetch('/api/transcribe', {
-        method: 'POST',
-        body: formData,
-      })
-
-      const data = await response.json()
-      
-      if (data.transcript) {
-        setStatus('Transcribed!')
-        onTranscript(data.transcript)
-      } else {
-        setStatus(data.error || 'Transcription failed')
-      }
-    } catch (err) {
-      setStatus('Error processing audio')
-      console.error(err)
+    setIsRecording(false)
+    if (timerRef.current) {
+      clearInterval(timerRef.current)
+      timerRef.current = null
     }
+    setRecordingTime(0)
+    setStatus('Tap mic to start')
   }
 
   const fmt = (s: number) => {
@@ -119,7 +129,7 @@ export default function VoiceRecorder({ onTranscript, isProcessing }: VoiceRecor
       
       <p style={{ marginTop: '12px', color: '#666' }}>{status}</p>
       <p style={{ fontSize: '12px', color: '#999' }}>
-        {isRecording ? 'Tap to stop' : 'Tap mic and speak (try Chrome)'}
+        {isRecording ? 'Tap to stop' : 'Tap mic and speak (works in Chrome)'}
       </p>
     </div>
   )

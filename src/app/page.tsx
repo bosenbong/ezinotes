@@ -90,7 +90,7 @@ export default function Home() {
         />
 
         <div style={{ padding: '16px', textAlign: 'center', borderTop: '1px solid #e5e7eb', fontSize: '12px', color: '#666' }}>
-          🔒 Audio stays on device • No data stored (demo mode)
+          🔒 Audio stays on device • Voice processed locally
         </div>
       </div>
     </main>
