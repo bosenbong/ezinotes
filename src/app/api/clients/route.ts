@@ -1,7 +1,6 @@
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
-
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
@@ -28,12 +27,15 @@ export async function GET(request: Request) {
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
 
-    if (error) throw error
+    if (error) {
+      console.log('Supabase error:', error)
+      return NextResponse.json({ clients: [] })
+    }
 
     return NextResponse.json({ clients: data || [] })
   } catch (error) {
     console.error('Get clients error:', error)
-    return NextResponse.json({ error: 'Failed to fetch clients' }, { status: 500 })
+    return NextResponse.json({ clients: [] })
   }
 }
 

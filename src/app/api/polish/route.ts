@@ -1,7 +1,6 @@
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
-
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
@@ -13,8 +12,10 @@ export async function POST(request: Request) {
     }
 
     const apiKey = process.env.OPENAI_API_KEY
+    console.log('API Key exists:', !!apiKey)
+    
     if (!apiKey) {
-      return NextResponse.json({ error: 'Server configuration error' }, { status: 500 })
+      return NextResponse.json({ error: 'Server configuration error - missing API key' }, { status: 500 })
     }
 
     // Build the prompt
@@ -65,6 +66,7 @@ Client safe and comfortable.`
 
     if (!response.ok) {
       const error = await response.text()
+      console.log('OpenAI error:', error)
       return NextResponse.json({ error: 'AI processing failed', details: error }, { status: 500 })
     }
 
@@ -74,6 +76,6 @@ Client safe and comfortable.`
     return NextResponse.json({ note: polishedNote })
   } catch (error) {
     console.error('Polish error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: 'Internal server error: ' + String(error) }, { status: 500 })
   }
 }
