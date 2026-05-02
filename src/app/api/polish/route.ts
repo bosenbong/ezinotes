@@ -1,11 +1,9 @@
 import { NextResponse } from 'next/server'
-import { NextRequest } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
-export const fetchCache = 'default-no-store'
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const { transcript, useAbbreviations = true, translate = false } = await request.json()
 
@@ -14,9 +12,10 @@ export async function POST(request: NextRequest) {
     }
 
     const apiKey = process.env.OPENAI_API_KEY
+    console.log('API Key set:', !!apiKey)
     
     if (!apiKey) {
-      return NextResponse.json({ error: 'Server configuration error - missing API key' }, { status: 500 })
+      return NextResponse.json({ error: 'OPENAI_API_KEY not configured' }, { status: 500 })
     }
 
     // Build the prompt
@@ -65,17 +64,22 @@ Client safe and comfortable.`
       }),
     })
 
+    console.log('OpenAI response status:', response.status)
+
     if (!response.ok) {
       const error = await response.text()
-      return NextResponse.json({ error: 'AI processing failed', details: error }, { status: 500 })
+      console.log('OpenAI error:', error)
+      return NextResponse.json({ error: 'AI failed', details: error }, { status: 500 })
     }
 
     const data = await response.json()
+    console.log('OpenAI response:', data)
+    
     const polishedNote = data.choices[0]?.message?.content || ''
 
     return NextResponse.json({ note: polishedNote })
   } catch (error) {
     console.error('Polish error:', error)
-    return NextResponse.json({ error: 'Internal server error: ' + String(error) }, { status: 500 })
+    return NextResponse.json({ error: 'Error: ' + String(error) }, { status: 500 })
   }
 }
