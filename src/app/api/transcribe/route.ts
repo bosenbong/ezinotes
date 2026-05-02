@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
+export const fetchCache = 'default-no-store'
 
 export async function POST(request: Request) {
   try {
@@ -14,7 +15,7 @@ export async function POST(request: Request) {
 
     const apiKey = process.env.OPENAI_API_KEY
     if (!apiKey) {
-      return NextResponse.json({ error: 'Server configuration error' }, { status: 500 })
+      return NextResponse.json({ error: 'OpenAI API key not configured' }, { status: 500 })
     }
 
     // Convert file to buffer
@@ -27,7 +28,7 @@ export async function POST(request: Request) {
     const footer = `\r\n--${boundary}--\r\n`
     const body = Buffer.concat([Buffer.from(header), buffer, Buffer.from(footer)])
 
-    // Call Whisper API
+    // Call Whisper API directly
     const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
       method: 'POST',
       headers: {
